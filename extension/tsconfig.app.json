@@ -5,6 +5,10 @@
     "types": ["chrome"],
     "target": "ESNext",
     "module": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

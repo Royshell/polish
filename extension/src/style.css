@@ -1,42 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
 @import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  font-family: var(--font-body);
-  background-color: var(--color-polish-bg);
-  color: white;
+/* ── Google Fonts ──────────────────────────────────────────────────────────── */
+
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  font-family: 'Orbitron', sans-serif;
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  display: flex;
-  place-items: center;
-  background-color: #0f172a;
-  color: #0b0a09; /* secondary-text */
+  background-color: var(--color-polish-bg);
+  color: var(--color-polish-fg);
+  font-family: var(--font-mono);
+  min-width: 280px;
 }
 
+/* ── Tailwind v4 Theme ─────────────────────────────────────────────────────── */
 @theme {
-  /* ---------- Colors ---------- */
-  --color-polish-bg: #0f172a;
-  --color-polish-panel: #1e293b;
+  /* ---------- Core palette ---------- */
+  --color-polish-bg: #090912;
+  --color-polish-panel: #0f0f1e;
+  --color-polish-surface: #1a1a3a;
+  --color-polish-border: #2a2a4a;
+  --color-polish-fg: #c0c0e0;
+  --color-polish-dim: #4a4a7a;
+
+  /* ---------- Accent colors ---------- */
+  --color-polish-green: #00ff88;
+  --color-polish-cyan: #00e5ff;
+  --color-polish-magenta: #ff00cc;
+  --color-polish-yellow: #ffe600;
+  --color-polish-red: #ff2244;
+
+  /* ---------- Legacy / keep from before ---------- */
   --color-polish-accent: #38bdf8;
   --color-polish-highlight: #facc15;
   --color-polish-danger: #ef4444;
   --color-polish-muted: #94a3b8;
 
   /* ---------- Fonts ---------- */
-
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-vt: 'VT323', monospace;
+  --font-mono: 'Share Tech Mono', monospace;
   --font-primary: 'Orbitron', sans-serif;
   --font-body: 'Inter', sans-serif;
 
-  /* ---------- Radius ---------- */
-
-  --radius-polish: 14px;
-
-  /* ---------- Shadows ---------- */
-
+  /* ---------- Shadows / glows ---------- */
   --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.6);
   --shadow-glow-red: 0 0 20px rgba(239, 68, 68, 0.6);
+  --shadow-glow-green: 0 0 12px rgba(0, 255, 136, 0.5);
+  --shadow-glow-cyan: 0 0 12px rgba(0, 229, 255, 0.4);
+  --shadow-glow-magenta: 0 0 12px rgba(255, 0, 204, 0.4);
+
+  /* ---------- Radius ---------- */
+  --radius-polish: 0px; /* intentionally square — retro style */
+}
+
+/* ── Reusable animations (used via Tailwind `animate-*` or direct class) ─── */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes scanPulse {
+  0%,
+  100% {
+    opacity: 0.03;
+  }
+  50% {
+    opacity: 0.07;
+  }
+}
+@keyframes btnShift {
+  0%,
+  100% {
+    background-position: 0%;
+  }
+  50% {
+    background-position: 100%;
+  }
+}
+@keyframes goldShift {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 200%;
+  }
+}
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 200%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+@keyframes sparkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3) rotate(20deg);
+    opacity: 0.7;
+  }
+}
+@keyframes arrowPulse {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(4px);
+  }
+}
+@keyframes dotFade {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.1;
+  }
 }

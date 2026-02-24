@@ -1,71 +1,100 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import PanelHeader    from './components/layout/PanelHeader.vue'
+import ThemePresetBar from './components/features/ThemePresetBar.vue'
+import OneClickPolish from './components/features/OneClickPolish.vue'
+import AiStylePanel   from './components/features/AiStylePanel.vue'
+import FooterOptions  from './components/features/FooterOptions.vue'
+import { usePolishState } from './composables/usePolishState'
+
+const {
+  selectedPreset,
+  toggles,
+  autoApply,
+  isPolishing,
+  isGenerating,
+  resetToDefaults,
+  applyPolish,
+  generateAiStyle,
+} = usePolishState()
+
+function closePanel() {
+  window.close()
+}
+</script>
 
 <template>
-  <div class="polish-panel">
-    <header class="polish-header">
-      <span class="polish-title">
-        <span class="white">Pol</span><span class="red">ish</span>
-      </span>
-    </header>
+  <div class="panel-root flex flex-col h-screen bg-polish-panel relative overflow-hidden">
 
-    <main class="polish-body">
-      <p>✨ Polish your website ✨</p>
-      <textarea placeholder="Make this website look like a Japanese garden…" />
-      <button class="action-btn">Analyze Page</button>
-    </main>
+    <PanelHeader
+      @open-list="() => {}"
+      @close="closePanel"
+    />
+
+    <p class="px-3 py-[5px] font-vt text-[15px] text-polish-dim border-b border-[#111128] tracking-wider flex-shrink-0">
+      <span class="text-polish-green">>&nbsp;</span>Refine the web you're on
+    </p>
+
+    <ThemePresetBar v-model="selectedPreset" @reset="resetToDefaults" />
+
+    <div class="flex-1 overflow-y-auto">
+      <OneClickPolish
+        :toggles="toggles"
+        :is-polishing="isPolishing"
+        @polish="applyPolish"
+        @update:toggles="Object.assign(toggles, $event)"
+      />
+
+      <AiStylePanel :loading="isGenerating" @generate="generateAiStyle" />
+    </div>
+
+    <FooterOptions
+      v-model:auto-apply="autoApply"
+      @open-presets="() => {}"
+    />
   </div>
 </template>
 
-<style>
-/* עיצוב שמתאים לכל גודל חלון שהמשתמש יבחר */
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #111;
-  color: white;
-  font-family: system-ui, sans-serif;
+<style scoped>
+/* Only pseudo-element effects live here — everything else is Tailwind */
+
+/* CRT scanlines */
+.panel-root::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 136, 0.025) 0px,
+    rgba(0, 255, 136, 0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 50;
+  animation: scanPulse 4s ease-in-out infinite;
 }
 
-.polish-panel {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+/* Pixel grid */
+.panel-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 136, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.025) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.polish-header {
-  padding: 16px;
-  border-bottom: 1px solid #333;
-  font-weight: bold;
-  font-size: 20px;
+.panel-root > * {
+  position: relative;
+  z-index: 1;
 }
 
-.red {
-  color: #dc143c;
-}
-
-.polish-body {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-textarea {
-  width: 100%;
-  height: 150px;
-  background: #000;
-  color: #0f0;
-  border: 1px solid #333;
-  padding: 10px;
-  border-radius: 4px;
-}
-
-.action-btn {
-  background: #dc143c;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
-  cursor: pointer;
-}
+/* Scrollbar */
+.panel-root :deep(*::-webkit-scrollbar)       { width: 4px; }
+.panel-root :deep(*::-webkit-scrollbar-track)  { background: transparent; }
+.panel-root :deep(*::-webkit-scrollbar-thumb)  { background: var(--color-polish-border); }
+.panel-root :deep(*::-webkit-scrollbar-thumb:hover) { background: var(--color-polish-dim); }
 </style>
