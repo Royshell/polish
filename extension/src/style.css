@@ -13,13 +13,12 @@ body {
   min-height: 100vh;
   display: flex;
   place-items: center;
-  background-color: #e7e5e4;
+  background-color: #0f172a;
   color: #0b0a09; /* secondary-text */
 }
 
 @theme {
   /* ---------- Colors ---------- */
-
   --color-polish-bg: #0f172a;
   --color-polish-panel: #1e293b;
   --color-polish-accent: #38bdf8;
