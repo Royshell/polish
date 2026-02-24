@@ -16,9 +16,6 @@ export default defineConfig({
 
         // Background Service Worker
         background: resolve(__dirname, 'src/background/background.ts'),
-
-        // Content Script
-        contentScript: resolve(__dirname, 'src/content/contentScript.ts'),
       },
       output: {
         entryFileNames: (chunk) => {
