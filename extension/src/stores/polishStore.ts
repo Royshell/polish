@@ -1,4 +1,5 @@
 import { ref, reactive } from 'vue';
+import { defineStore } from 'pinia';
 
 export interface PolishToggles {
   moreContrast: boolean;
@@ -14,7 +15,8 @@ const DEFAULT_TOGGLES: PolishToggles = {
   betterFonts: true,
 };
 
-export function usePolishState() {
+export const usePolishStore = defineStore('polish', () => {
+
   const selectedPreset = ref('Cyber Mode');
   const toggles = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
   const aiPrompt = ref('');
@@ -23,10 +25,15 @@ export function usePolishState() {
   const isGenerating = ref(false);
   const lastAppliedCSS = ref<string | null>(null);
 
+
   function resetToDefaults() {
     Object.assign(toggles, DEFAULT_TOGGLES);
     selectedPreset.value = 'Cyber Mode';
     aiPrompt.value = '';
+  }
+
+  function setToggle(key: keyof PolishToggles, value: boolean) {
+    toggles[key] = value;
   }
 
   async function applyPolish() {
@@ -55,8 +62,6 @@ export function usePolishState() {
     await sendCSSToPage('');
     lastAppliedCSS.value = null;
   }
-
-  // ── helpers ───────────────────────────────────────────────────────────────
 
   function buildToggleCSS(t: PolishToggles): string {
     const rules: string[] = [];
@@ -114,6 +119,7 @@ export function usePolishState() {
   }
 
   return {
+    // state
     selectedPreset,
     toggles,
     aiPrompt,
@@ -121,9 +127,11 @@ export function usePolishState() {
     isPolishing,
     isGenerating,
     lastAppliedCSS,
+    // actions
     resetToDefaults,
+    setToggle,
     applyPolish,
     generateAiStyle,
     revertStyles,
   };
-}
+});
