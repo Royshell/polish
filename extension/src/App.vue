@@ -1,12 +1,20 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import PanelHeader    from './components/layout/PanelHeader.vue';
 import ThemePresetBar from './components/features/ThemePresetBar.vue';
 import OneClickPolish from './components/features/OneClickPolish.vue';
 import AiStylePanel   from './components/features/AiStylePanel.vue';
+import PresetsCard    from './components/features/PresetsCard.vue';
 import FooterOptions  from './components/features/FooterOptions.vue';
 
 function closePanel() {
   window.close();
+}
+
+const presetsRef = ref<HTMLElement | null>(null);
+
+function scrollToPresets() {
+  presetsRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 </script>
 
@@ -24,9 +32,13 @@ function closePanel() {
     <div class="flex-1 overflow-y-auto">
       <OneClickPolish />
       <AiStylePanel />
+
+      <div ref="presetsRef">
+        <PresetsCard />
+      </div>
     </div>
 
-    <FooterOptions @open-presets="() => {}" />
+    <FooterOptions @open-presets="scrollToPresets" />
 
   </div>
 </template>

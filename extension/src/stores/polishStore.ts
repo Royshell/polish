@@ -8,6 +8,14 @@ export interface PolishToggles {
   betterFonts: boolean;
 }
 
+export interface UserPreset {
+  id: string;
+  name: string;
+  css: string;
+  source: 'toggles' | 'ai';
+  createdAt: number;
+}
+
 const DEFAULT_TOGGLES: PolishToggles = {
   moreContrast: true,
   extraSpacing: true,
@@ -15,8 +23,10 @@ const DEFAULT_TOGGLES: PolishToggles = {
   betterFonts: true,
 };
 
-export const usePolishStore = defineStore('polish', () => {
+const STORAGE_KEY = 'polish_presets';
 
+export const usePolishStore = defineStore('polish', () => {
+  // ── State ──────────────────────────────────────────────────────────────────
   const selectedPreset = ref('Cyber Mode');
   const toggles = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
   const aiPrompt = ref('');
@@ -24,8 +34,21 @@ export const usePolishStore = defineStore('polish', () => {
   const isPolishing = ref(false);
   const isGenerating = ref(false);
   const lastAppliedCSS = ref<string | null>(null);
+  const lastAppliedSource = ref<'toggles' | 'ai' | null>(null);
+  const presets = ref<UserPreset[]>([]);
+  const activePresetId = ref<string | null>(null);
 
+  // ── Init — called explicitly from main.ts after app mounts ────────────────
+  // NOT called at module load time — chrome.storage isn't ready yet then.
+  function init() {
+    chrome.storage.local.get(STORAGE_KEY, (result) => {
+      if (result[STORAGE_KEY]) {
+        presets.value = result[STORAGE_KEY] as UserPreset[];
+      }
+    });
+  }
 
+  // ── Core Actions ───────────────────────────────────────────────────────────
   function resetToDefaults() {
     Object.assign(toggles, DEFAULT_TOGGLES);
     selectedPreset.value = 'Cyber Mode';
@@ -42,6 +65,8 @@ export const usePolishStore = defineStore('polish', () => {
       const css = buildToggleCSS(toggles);
       await sendCSSToPage(css);
       lastAppliedCSS.value = css;
+      lastAppliedSource.value = 'toggles';
+      activePresetId.value = null;
     } finally {
       isPolishing.value = false;
     }
@@ -53,6 +78,8 @@ export const usePolishStore = defineStore('polish', () => {
       const css = await fetchAiCSS(prompt);
       await sendCSSToPage(css);
       lastAppliedCSS.value = css;
+      lastAppliedSource.value = 'ai';
+      activePresetId.value = null;
     } finally {
       isGenerating.value = false;
     }
@@ -61,11 +88,53 @@ export const usePolishStore = defineStore('polish', () => {
   async function revertStyles() {
     await sendCSSToPage('');
     lastAppliedCSS.value = null;
+    lastAppliedSource.value = null;
+    activePresetId.value = null;
   }
 
+  // ── Preset Actions ─────────────────────────────────────────────────────────
+  async function savePreset(name: string) {
+    if (!lastAppliedCSS.value) return;
+
+    const preset: UserPreset = {
+      id: `preset_${Date.now()}`,
+      name: name.trim(),
+      css: lastAppliedCSS.value,
+      source: lastAppliedSource.value ?? 'toggles',
+      createdAt: Date.now(),
+    };
+
+    presets.value.push(preset);
+    activePresetId.value = preset.id;
+    await persistPresets();
+  }
+
+  async function applyPreset(id: string) {
+    const preset = presets.value.find((p) => p.id === id);
+    if (!preset) return;
+    await sendCSSToPage(preset.css);
+    lastAppliedCSS.value = preset.css;
+    lastAppliedSource.value = preset.source;
+    activePresetId.value = id;
+  }
+
+  async function deletePreset(id: string) {
+    presets.value = presets.value.filter((p) => p.id !== id);
+    if (activePresetId.value === id) activePresetId.value = null;
+    await persistPresets();
+  }
+
+  async function renamePreset(id: string, newName: string) {
+    const preset = presets.value.find((p) => p.id === id);
+    if (preset) {
+      preset.name = newName.trim();
+      await persistPresets();
+    }
+  }
+
+  // ── Private Helpers ────────────────────────────────────────────────────────
   function buildToggleCSS(t: PolishToggles): string {
     const rules: string[] = [];
-
     if (t.moreContrast) {
       rules.push(`
         body { background: #fff !important; color: #111 !important; }
@@ -91,7 +160,6 @@ export const usePolishStore = defineStore('polish', () => {
         h1, h2, h3 { font-weight: 600 !important; }
       `);
     }
-
     return rules.join('\n');
   }
 
@@ -118,8 +186,11 @@ export const usePolishStore = defineStore('polish', () => {
     chrome.tabs.sendMessage(tab.id, { type: 'APPLY_CSS', css });
   }
 
+  async function persistPresets(): Promise<void> {
+    await chrome.storage.local.set({ [STORAGE_KEY]: presets.value });
+  }
+
   return {
-    // state
     selectedPreset,
     toggles,
     aiPrompt,
@@ -127,11 +198,18 @@ export const usePolishStore = defineStore('polish', () => {
     isPolishing,
     isGenerating,
     lastAppliedCSS,
-    // actions
+    lastAppliedSource,
+    presets,
+    activePresetId,
+    init,
     resetToDefaults,
     setToggle,
     applyPolish,
     generateAiStyle,
     revertStyles,
+    savePreset,
+    applyPreset,
+    deletePreset,
+    renamePreset,
   };
 });
