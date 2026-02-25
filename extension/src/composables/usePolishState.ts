@@ -1,80 +1,80 @@
-import { ref, reactive } from 'vue'  // removed unused 'watch'
+import { ref, reactive } from 'vue';
 
 export interface PolishToggles {
-  moreContrast: boolean
-  extraSpacing: boolean
-  vibrantColors: boolean
-  betterFonts: boolean
+  moreContrast: boolean;
+  extraSpacing: boolean;
+  vibrantColors: boolean;
+  betterFonts: boolean;
 }
 
 const DEFAULT_TOGGLES: PolishToggles = {
-  moreContrast:  true,
-  extraSpacing:  true,
+  moreContrast: true,
+  extraSpacing: true,
   vibrantColors: true,
-  betterFonts:   true,
-}
+  betterFonts: true,
+};
 
 export function usePolishState() {
-  const selectedPreset = ref('Cyber Mode')
-  const toggles = reactive<PolishToggles>({ ...DEFAULT_TOGGLES })
-  const aiPrompt = ref('')
-  const autoApply = ref(false)
-  const isPolishing = ref(false)
-  const isGenerating = ref(false)
-  const lastAppliedCSS = ref<string | null>(null)
+  const selectedPreset = ref('Cyber Mode');
+  const toggles = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
+  const aiPrompt = ref('');
+  const autoApply = ref(false);
+  const isPolishing = ref(false);
+  const isGenerating = ref(false);
+  const lastAppliedCSS = ref<string | null>(null);
 
   function resetToDefaults() {
-    Object.assign(toggles, DEFAULT_TOGGLES)
-    selectedPreset.value = 'Cyber Mode'
-    aiPrompt.value = ''
+    Object.assign(toggles, DEFAULT_TOGGLES);
+    selectedPreset.value = 'Cyber Mode';
+    aiPrompt.value = '';
   }
 
   async function applyPolish() {
-    isPolishing.value = true
+    isPolishing.value = true;
     try {
-      const css = buildToggleCSS(toggles)
-      await sendCSSToPage(css)
-      lastAppliedCSS.value = css
+      const css = buildToggleCSS(toggles);
+      await sendCSSToPage(css);
+      lastAppliedCSS.value = css;
     } finally {
-      isPolishing.value = false
+      isPolishing.value = false;
     }
   }
 
   async function generateAiStyle(prompt: string) {
-    isGenerating.value = true
+    isGenerating.value = true;
     try {
-      const css = await fetchAiCSS(prompt)
-      await sendCSSToPage(css)
-      lastAppliedCSS.value = css
+      const css = await fetchAiCSS(prompt);
+      await sendCSSToPage(css);
+      lastAppliedCSS.value = css;
     } finally {
-      isGenerating.value = false
+      isGenerating.value = false;
     }
   }
 
   async function revertStyles() {
-    await sendCSSToPage('')
-    lastAppliedCSS.value = null
+    await sendCSSToPage('');
+    lastAppliedCSS.value = null;
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────
 
   function buildToggleCSS(t: PolishToggles): string {
-    const rules: string[] = []
+    const rules: string[] = [];
 
     if (t.moreContrast) {
       rules.push(`
         body { background: #fff !important; color: #111 !important; }
         a    { color: #0055cc !important; }
-      `)
+      `);
     }
     if (t.extraSpacing) {
       rules.push(`
         p, li { line-height: 1.9 !important; letter-spacing: 0.02em !important; }
         p     { margin-bottom: 1.2em !important; }
-      `)
+      `);
     }
     if (t.vibrantColors) {
-      rules.push(`:root { filter: saturate(1.4) contrast(1.05); }`)
+      rules.push(`:root { filter: saturate(1.4) contrast(1.05); }`);
     }
     if (t.betterFonts) {
       rules.push(`
@@ -84,10 +84,10 @@ export function usePolishState() {
           font-size: 15px !important;
         }
         h1, h2, h3 { font-weight: 600 !important; }
-      `)
+      `);
     }
 
-    return rules.join('\n')
+    return rules.join('\n');
   }
 
   async function fetchAiCSS(prompt: string): Promise<string> {
@@ -96,21 +96,21 @@ export function usePolishState() {
         { type: 'GENERATE_CSS', prompt },
         (response: { css?: string; error?: string }) => {
           if (chrome.runtime.lastError) {
-            reject(chrome.runtime.lastError)
+            reject(chrome.runtime.lastError);
           } else if (response?.error) {
-            reject(new Error(response.error))
+            reject(new Error(response.error));
           } else {
-            resolve(response?.css ?? '')
+            resolve(response?.css ?? '');
           }
         },
-      )
-    })
+      );
+    });
   }
 
   async function sendCSSToPage(css: string): Promise<void> {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-    if (!tab?.id) return
-    chrome.tabs.sendMessage(tab.id, { type: 'APPLY_CSS', css })
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) return;
+    chrome.tabs.sendMessage(tab.id, { type: 'APPLY_CSS', css });
   }
 
   return {
@@ -125,5 +125,5 @@ export function usePolishState() {
     applyPolish,
     generateAiStyle,
     revertStyles,
-  }
+  };
 }
