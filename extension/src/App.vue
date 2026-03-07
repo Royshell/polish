@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import PanelHeader    from './components/layout/PanelHeader.vue';
 import ThemePresetBar from './components/features/ThemePresetBar.vue';
 import OneClickPolish from './components/features/OneClickPolish.vue';
+import FineTuneCard   from './components/features/FineTuneCard.vue';
 import AiStylePanel   from './components/features/AiStylePanel.vue';
 import PresetsCard    from './components/features/PresetsCard.vue';
 import FooterOptions  from './components/features/FooterOptions.vue';
@@ -31,6 +32,7 @@ function scrollToPresets() {
 
     <div class="flex-1 overflow-y-auto">
       <OneClickPolish />
+      <FineTuneCard />
       <AiStylePanel />
 
       <div ref="presetsRef">

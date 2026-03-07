@@ -17,6 +17,22 @@ export interface UserPreset {
   createdAt: number;
 }
 
+export interface FineTuneState {
+  bodyFontSize: number;   // 12–22px
+  headingScale: number;   // 0.8–2.0x
+  bgColor: string;        // '' = not applied
+  textColor: string;      // '' = not applied
+  fontFamily: string;     // '' | 'inter' | 'georgia' | 'merriweather' | 'mono'
+}
+
+const DEFAULT_FINETUNE: FineTuneState = {
+  bodyFontSize: 16,
+  headingScale: 1.0,
+  bgColor: '',
+  textColor: '',
+  fontFamily: '',
+};
+
 const DEFAULT_TOGGLES: PolishToggles = {
   moreContrast: false,
   darkMode: false,
@@ -31,6 +47,7 @@ export const usePolishStore = defineStore('polish', () => {
   // ── State ──────────────────────────────────────────────────────────────────
   const selectedPreset = ref('Cyber Mode');
   const toggles = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
+  const fineTune = reactive<FineTuneState>({ ...DEFAULT_FINETUNE });
   const aiPrompt = ref('');
   const autoApply = ref(false);
   const isPolishing = ref(false);
@@ -55,6 +72,18 @@ export const usePolishStore = defineStore('polish', () => {
     Object.assign(toggles, DEFAULT_TOGGLES);
     selectedPreset.value = 'Cyber Mode';
     aiPrompt.value = '';
+  }
+
+  function resetFineTune() {
+    Object.assign(fineTune, DEFAULT_FINETUNE);
+    applyFineTune();
+  }
+
+  async function applyFineTune() {
+    const css = buildFineTuneCSS(fineTune);
+    // Merge with last toggle CSS so both layers coexist
+    const combined = [lastAppliedCSS.value ?? '', css].filter(Boolean).join('\n');
+    await sendCSSToPage(combined, fineTune.fontFamily === 'inter');
   }
 
   function setToggle(key: keyof PolishToggles, value: boolean) {
@@ -359,6 +388,67 @@ code, pre, kbd { font-family: 'JetBrains Mono', 'Fira Code', monospace !importan
     return rules.join('\n');
   }
 
+  function buildFineTuneCSS(ft: FineTuneState): string {
+    const rules: string[] = [];
+    const BASE = 16; // browser default
+
+    if (ft.bodyFontSize !== BASE) {
+      rules.push(`
+/* Fine-Tune: body size */
+body, p, span, li, td, th, label, blockquote, div {
+  font-size: ${ft.bodyFontSize}px !important;
+}`);
+    }
+
+    if (ft.headingScale !== 1.0) {
+      const s = ft.headingScale;
+      rules.push(`
+/* Fine-Tune: heading scale */
+h1 { font-size: ${(2.0   * s).toFixed(2)}rem !important; }
+h2 { font-size: ${(1.5   * s).toFixed(2)}rem !important; }
+h3 { font-size: ${(1.25  * s).toFixed(2)}rem !important; }
+h4 { font-size: ${(1.1   * s).toFixed(2)}rem !important; }
+h5 { font-size: ${(1.0   * s).toFixed(2)}rem !important; }
+h6 { font-size: ${(0.875 * s).toFixed(2)}rem !important; }`);
+    }
+
+    if (ft.bgColor) {
+      rules.push(`
+/* Fine-Tune: background */
+html, body { background-color: ${ft.bgColor} !important; }`);
+    }
+
+    if (ft.textColor) {
+      rules.push(`
+/* Fine-Tune: text color */
+p, span, li, td, th, dt, dd, label, blockquote,
+figcaption, address, cite, small, time, strong, em {
+  color: ${ft.textColor} !important;
+}
+h1, h2, h3, h4, h5, h6 { color: ${ft.textColor} !important; }`);
+    }
+
+    if (ft.fontFamily) {
+      const fontMap: Record<string, string> = {
+        inter:        "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        georgia:      "Georgia, 'Times New Roman', serif",
+        merriweather: "'Merriweather', Georgia, serif",
+        mono:         "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
+      };
+      const stack = fontMap[ft.fontFamily];
+      if (stack) {
+        rules.push(`
+/* Fine-Tune: font family */
+body, p, span, li, td, th, label, div,
+input, textarea, select, button, blockquote {
+  font-family: ${stack} !important;
+}`);
+      }
+    }
+
+    return rules.join('\n');
+  }
+
   async function fetchAiCSS(prompt: string): Promise<string> {
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
@@ -376,8 +466,8 @@ code, pre, kbd { font-family: 'JetBrains Mono', 'Fira Code', monospace !importan
     });
   }
 
-  async function sendCSSToPage(css: string): Promise<void> {
-    const injectFontLink = toggles.readable && !!css;
+  async function sendCSSToPage(css: string, forceFont = false): Promise<void> {
+    const injectFontLink = (toggles.readable || forceFont) && !!css;
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
         { type: 'APPLY_CSS', css, injectFontLink },
@@ -406,6 +496,9 @@ code, pre, kbd { font-family: 'JetBrains Mono', 'Fira Code', monospace !importan
     presets,
     activePresetId,
     init,
+    fineTune,
+    resetFineTune,
+    applyFineTune,
     resetToDefaults,
     setToggle,
     applyPolish,
