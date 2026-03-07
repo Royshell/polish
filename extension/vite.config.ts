@@ -11,17 +11,18 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       input: {
-        index: resolve(__dirname, 'index.html'),
-        background: resolve(__dirname, 'src/background/background.ts'),
+        index:         resolve(__dirname, 'index.html'),
+        background:    resolve(__dirname, 'src/background/background.ts'),
+        contentScript: resolve(__dirname, 'src/content/contentScript.ts'), // ← הוסף
       },
       output: {
         entryFileNames: (chunk) => {
-          if (chunk.name === 'background') return 'background/background.js';
+          if (chunk.name === 'background')    return 'background/background.js';
           if (chunk.name === 'contentScript') return 'content/contentScript.js';
           return 'assets/[name]-[hash].js';
         },
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames:  'assets/[name]-[hash].js',
+        assetFileNames:  'assets/[name]-[hash][extname]',
       },
     },
   },

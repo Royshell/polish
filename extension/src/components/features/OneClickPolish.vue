@@ -7,10 +7,11 @@ import type { PolishToggles } from '../../stores/polishStore';
 const store = usePolishStore();
 
 const TOGGLE_LABELS: { key: keyof PolishToggles; label: string }[] = [
-  { key: 'moreContrast',  label: 'More Contrast'  },
-  { key: 'extraSpacing',  label: 'Extra Spacing'   },
-  { key: 'vibrantColors', label: 'Vibrant Colors'  },
-  { key: 'betterFonts',   label: 'Better Fonts'    },
+  { key: 'moreContrast', label: 'More Contrast' },
+  { key: 'darkMode',     label: 'Dark Mode'      },
+  { key: 'focusMode',    label: 'Focus Mode'     },
+  { key: 'extraSpacing', label: 'Extra Spacing'  },
+  { key: 'readable',     label: 'Readable'       },
 ];
 </script>
 
@@ -33,6 +34,8 @@ const TOGGLE_LABELS: { key: keyof PolishToggles; label: string }[] = [
       </button>
     </div>
 
+    <!-- Note: More Contrast + Dark Mode are mutually exclusive.
+         setToggle() in the store handles the logic automatically. -->
     <div class="mt-1.5 border-t border-[#111128]">
       <RetroToggle
         v-for="item in TOGGLE_LABELS"

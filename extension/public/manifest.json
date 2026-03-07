@@ -18,7 +18,7 @@
     "48": "/icons/icon-48.png",
     "128": "/icons/icon-128.png"
   },
-  "permissions": ["sidePanel", "storage"],
+  "permissions": ["sidePanel", "storage", "tabs", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "/background/background.js",
