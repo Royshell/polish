@@ -1,42 +1,47 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import SectionCard from '../layout/SectionCard.vue';
-import { usePolishStore } from '../../stores/polishStore';
+import { ref, computed } from "vue";
+import SectionCard from "../layout/SectionCard.vue";
+import { usePolishStore } from "../../stores/polishStore";
 
 const store = usePolishStore();
 
 // ── Save flow ──────────────────────────────────────────────────────────────
 const isSaving = ref(false);
-const saveName = ref('');
+const saveName = ref("");
 const saveInput = ref<HTMLInputElement | null>(null);
 
 function startSave() {
   const count = store.presets.length + 1;
-  saveName.value = store.lastAppliedSource === 'ai' ? `AI Style ${count}` : `Polish ${count}`;
+  saveName.value =
+    store.lastAppliedSource === "ai" ? `AI Style ${count}` : `Polish ${count}`;
   isSaving.value = true;
   setTimeout(() => saveInput.value?.select(), 50);
 }
 
 function cancelSave() {
   isSaving.value = false;
-  saveName.value = '';
+  saveName.value = "";
 }
 
 async function confirmSave() {
   if (!saveName.value.trim()) return;
   await store.savePreset(saveName.value);
   isSaving.value = false;
-  saveName.value = '';
+  saveName.value = "";
 }
 
 function handleSaveKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter') confirmSave();
-  if (e.key === 'Escape') cancelSave();
+  if (e.key === "Enter") {
+    confirmSave();
+  }
+  if (e.key === "Escape") {
+    cancelSave();
+  }
 }
 
 // ── Rename flow ────────────────────────────────────────────────────────────
 const renamingId = ref<string | null>(null);
-const renameValue = ref('');
+const renameValue = ref("");
 
 function startRename(id: string, currentName: string) {
   renamingId.value = id;
@@ -50,8 +55,8 @@ async function confirmRename(id: string) {
 }
 
 function handleRenameKeydown(e: KeyboardEvent, id: string) {
-  if (e.key === 'Enter') confirmRename(id);
-  if (e.key === 'Escape') renamingId.value = null;
+  if (e.key === "Enter") confirmRename(id);
+  if (e.key === "Escape") renamingId.value = null;
 }
 
 // ── Display ────────────────────────────────────────────────────────────────
@@ -59,19 +64,16 @@ const VISIBLE_LIMIT = 3;
 const showAll = ref(false);
 
 const visiblePresets = computed(() =>
-  showAll.value ? store.presets : store.presets.slice(0, VISIBLE_LIMIT),
+  showAll.value ? store.presets : store.presets.slice(0, VISIBLE_LIMIT)
 );
 
-const hiddenCount = computed(() =>
-  Math.max(0, store.presets.length - VISIBLE_LIMIT),
-);
+const hiddenCount = computed(() => Math.max(0, store.presets.length - VISIBLE_LIMIT));
 
 const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
 </script>
 
 <template>
   <SectionCard title="My Presets" icon="◉">
-
     <!-- Empty state -->
     <div
       v-if="store.presets.length === 0 && !isSaving"
@@ -88,9 +90,11 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
         v-for="preset in visiblePresets"
         :key="preset.id"
         class="flex items-center gap-1.5 px-2 py-[5px] border transition-colors group"
-        :class="store.activePresetId === preset.id
-          ? 'border-polish-green bg-polish-green/5'
-          : 'border-polish-border hover:border-polish-dim'"
+        :class="
+          store.activePresetId === preset.id
+            ? 'border-polish-green bg-polish-green/5'
+            : 'border-polish-border hover:border-polish-dim'
+        "
       >
         <!-- Source icon -->
         <span
@@ -98,7 +102,7 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
           :class="preset.source === 'ai' ? 'text-polish-magenta' : 'text-polish-cyan'"
           :title="preset.source === 'ai' ? 'AI generated' : 'Toggles'"
         >
-          {{ preset.source === 'ai' ? '◈' : '⬛' }}
+          {{ preset.source === "ai" ? "◈" : "⬛" }}
         </span>
 
         <!-- Name / rename input -->
@@ -114,9 +118,11 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
           <span
             v-else
             class="font-mono text-[11px] truncate block cursor-pointer transition-colors"
-            :class="store.activePresetId === preset.id
-              ? 'text-polish-green'
-              : 'text-polish-fg hover:text-polish-green'"
+            :class="
+              store.activePresetId === preset.id
+                ? 'text-polish-green'
+                : 'text-polish-fg hover:text-polish-green'
+            "
             title="Double-click to rename"
             @dblclick="startRename(preset.id, preset.name)"
           >
@@ -127,19 +133,23 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
         <!-- Actions — visible on hover, always visible when active -->
         <div
           class="flex gap-1 shrink-0 transition-opacity"
-          :class="store.activePresetId === preset.id
-            ? 'opacity-100'
-            : 'opacity-0 group-hover:opacity-100'"
+          :class="
+            store.activePresetId === preset.id
+              ? 'opacity-100'
+              : 'opacity-0 group-hover:opacity-100'
+          "
         >
           <button
             class="font-pixel text-[7px] px-[6px] py-[3px] border transition-all"
-            :class="store.activePresetId === preset.id
-              ? 'border-polish-green text-polish-green bg-polish-green/10 cursor-default'
-              : 'border-polish-dim text-polish-dim hover:border-polish-green hover:text-polish-green'"
+            :class="
+              store.activePresetId === preset.id
+                ? 'border-polish-green text-polish-green bg-polish-green/10 cursor-default'
+                : 'border-polish-dim text-polish-dim hover:border-polish-green hover:text-polish-green'
+            "
             :title="store.activePresetId === preset.id ? 'Active' : 'Apply'"
             @click="store.applyPreset(preset.id)"
           >
-            {{ store.activePresetId === preset.id ? '✓' : '▶' }}
+            {{ store.activePresetId === preset.id ? "✓" : "▶" }}
           </button>
 
           <button
@@ -158,13 +168,12 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
         class="font-mono text-[10px] text-polish-dim hover:text-polish-cyan transition-colors py-1 text-left"
         @click="showAll = !showAll"
       >
-        {{ showAll ? '▲ Show less' : `▼ +${hiddenCount} more` }}
+        {{ showAll ? "▲ Show less" : `▼ +${hiddenCount} more` }}
       </button>
     </div>
 
     <!-- Divider + save row -->
     <div class="border-t border-[#111128] mt-1 pt-2">
-
       <!-- Inline save form -->
       <div v-if="isSaving" class="flex items-center gap-1.5">
         <span class="text-polish-green text-[10px] shrink-0 font-mono">Name:</span>
@@ -193,9 +202,11 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
       <button
         v-else
         class="flex items-center gap-1.5 w-full font-mono text-[11px] py-[5px] transition-colors"
-        :class="canSave
-          ? 'text-polish-green hover:text-polish-yellow cursor-pointer'
-          : 'text-polish-dim cursor-not-allowed opacity-50'"
+        :class="
+          canSave
+            ? 'text-polish-green hover:text-polish-yellow cursor-pointer'
+            : 'text-polish-dim cursor-not-allowed opacity-50'
+        "
         :disabled="!canSave"
         :title="canSave ? 'Save current style as preset' : 'Apply a style first'"
         @click="canSave && startSave()"
@@ -204,6 +215,5 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
         Save current style
       </button>
     </div>
-
   </SectionCard>
 </template>
