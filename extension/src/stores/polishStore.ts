@@ -33,6 +33,234 @@ const DEFAULT_FINETUNE: FineTuneState = {
   fontFamily: '',
 };
 
+export interface SystemPreset {
+  id: string;
+  label: string;
+  css: string;
+}
+
+// ── System Presets ─────────────────────────────────────────────────────────
+export const SYSTEM_PRESETS: SystemPreset[] = [
+  {
+    id: 'miami-vice',
+    label: '🌴 Miami Vice',
+    css: `
+/* Miami Vice — cinematic 80s night, based on the original title card */
+
+/* Broadway BT via CDNFonts */
+@import url('https://fonts.cdnfonts.com/css/broadway-bt');
+
+html, body,
+div#root, div#app, div#__next, div#main, div#wrapper, div#container,
+main, article, section, header, footer, nav, aside,
+[class*="layout"], [class*="Layout"],
+[class*="wrapper"], [class*="Wrapper"],
+[class*="container"], [class*="Container"],
+[class*="page-"], [class*="Page"],
+[class*="site-"], [id*="site-"],
+[class*="content-wrap"], [class*="app-body"] {
+  /* Deep midnight teal-blue — the night sky behind the title */
+  background-color: #071428 !important;
+}
+p, span, li, td, th, dt, dd, label, blockquote,
+figcaption, address, cite, small, time,
+strong, em, b, i {
+  /* Soft cool white, like city lights reflected on water */
+  color: #c8ddf0 !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  /* Hot neon pink — exactly the title card color */
+  color: #ff1e8e !important;
+  font-family: 'Broadway BT', 'Broadway', fantasy !important;
+  font-style: normal !important;
+  text-shadow: 0 0 12px rgba(255,30,142,0.7), 0 0 30px rgba(255,30,142,0.3) !important;
+  letter-spacing: 0.02em !important;
+}
+a         { color: #00c8c8 !important; }
+a:visited { color: #7b4fcc !important; }
+a:hover   {
+  color: #ff1e8e !important;
+  text-shadow: 0 0 8px rgba(255,30,142,0.6) !important;
+}
+::selection {
+  background: #ff1e8e !important;
+  color: #071428 !important;
+}
+input, textarea, select {
+  background-color: #0a1f38 !important;
+  color: #c8ddf0 !important;
+  border-color: #00c8c880 !important;
+}
+body, p, span, li, td, th, label, div,
+input, textarea, select, button, blockquote {
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.04em !important;
+}
+strong, b { color: #ff1e8e !important; font-weight: 400 !important; }
+code, pre {
+  background: #0a1f38 !important;
+  color: #00c8c8 !important;
+  border-color: #00c8c840 !important;
+}
+`,
+  },
+  {
+    id: 'cyber-mode',
+    label: '⚡ Cyber Mode',
+    css: `
+/* Cyber Mode — neon green on deep black */
+html, body,
+div#root, div#app, div#__next, div#main, div#wrapper, div#container,
+main, article, section, header, footer, nav, aside,
+[class*="layout"], [class*="Layout"],
+[class*="wrapper"], [class*="Wrapper"],
+[class*="container"], [class*="Container"],
+[class*="page-"], [class*="site-"],
+[class*="content-wrap"], [class*="app-body"] { background-color: #020408 !important; }
+p, span, li, td, th, dt, dd, label, blockquote,
+figcaption, address, cite, small, time,
+strong, em, b, i { color: #b0ffcc !important; }
+h1, h2, h3, h4, h5, h6 {
+  color: #00ff88 !important;
+  text-shadow: 0 0 10px rgba(0,255,136,0.6) !important;
+  letter-spacing: 0.06em !important;
+}
+a         { color: #00e5ff !important; }
+a:visited { color: #7b5ea7 !important; }
+a:hover   { color: #00ff88 !important; text-shadow: 0 0 8px rgba(0,255,136,0.8) !important; }
+::selection { background: #00ff88 !important; color: #020408 !important; }
+input, textarea, select {
+  background-color: #061208 !important;
+  color: #00ff88 !important;
+  border-color: #00ff8866 !important;
+}
+body, p, span, li, td, th, label, div,
+input, textarea, select, button, blockquote {
+  font-family: 'Share Tech Mono', 'Courier New', monospace !important;
+}
+code, pre { background: #061208 !important; color: #00e5ff !important; border-color: #00ff8844 !important; }
+`,
+  },
+  {
+    id: 'clean-reader',
+    label: '📖 Clean Reader',
+    css: `
+/* Clean Reader — distraction-free reading */
+html, body,
+div#root, div#app, div#__next, div#main, div#wrapper, div#container,
+main, article, section, header, footer, nav, aside,
+[class*="layout"], [class*="Layout"],
+[class*="wrapper"], [class*="Wrapper"],
+[class*="container"], [class*="Container"],
+[class*="page-"], [class*="site-"],
+[class*="content-wrap"], [class*="app-body"] { background-color: #fafaf8 !important; }
+p, span, li, td, th, dt, dd, label, blockquote,
+figcaption, address, cite, small, time,
+strong, em, b, i { color: #2c2c2c !important; }
+h1, h2, h3, h4, h5, h6 { color: #111111 !important; }
+a         { color: #1a56cc !important; }
+a:visited { color: #6b21a8 !important; }
+input, textarea, select {
+  background-color: #f0f0ee !important;
+  color: #2c2c2c !important;
+  border-color: #cccccc !important;
+}
+body, p, span, li, td, th, label, div,
+input, textarea, select, button, blockquote {
+  font-family: 'Georgia', 'Times New Roman', serif !important;
+  font-size: 16px !important;
+  line-height: 1.8 !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+p { max-width: 66ch !important; }
+`,
+  },
+  {
+    id: 'newspaper',
+    label: '🗞 Newspaper',
+    css: `
+/* Newspaper — classic editorial, dense serif */
+html, body,
+div#root, div#app, div#__next, div#main, div#wrapper, div#container,
+main, article, section, header, footer, nav, aside,
+[class*="layout"], [class*="Layout"],
+[class*="wrapper"], [class*="Wrapper"],
+[class*="container"], [class*="Container"],
+[class*="page-"], [class*="site-"],
+[class*="content-wrap"], [class*="app-body"] { background-color: #f4f1eb !important; }
+p, span, li, td, th, dt, dd, label, blockquote,
+figcaption, address, cite, small, time,
+strong, em, b, i { color: #1a1a1a !important; }
+h1, h2, h3, h4, h5, h6 {
+  color: #000000 !important;
+  font-family: 'Georgia', 'Times New Roman', serif !important;
+  letter-spacing: -0.01em !important;
+  border-bottom: 1px solid #1a1a1a !important;
+  padding-bottom: 0.2em !important;
+}
+a         { color: #8b0000 !important; text-decoration: underline !important; }
+a:visited { color: #4a0000 !important; }
+input, textarea, select {
+  background-color: #ede9e0 !important;
+  color: #1a1a1a !important;
+  border-color: #aaaaaa !important;
+}
+body, p, span, li, td, th, label {
+  font-family: 'Georgia', 'Times New Roman', serif !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+}
+blockquote {
+  border-left: 3px solid #1a1a1a !important;
+  font-style: italic !important;
+  color: #444 !important;
+}
+`,
+  },
+  {
+    id: 'night-owl',
+    label: '🦉 Night Owl',
+    css: `
+/* Night Owl — warm dark for late reading */
+html, body,
+div#root, div#app, div#__next, div#main, div#wrapper, div#container,
+main, article, section, header, footer, nav, aside,
+[class*="layout"], [class*="Layout"],
+[class*="wrapper"], [class*="Wrapper"],
+[class*="container"], [class*="Container"],
+[class*="page-"], [class*="site-"],
+[class*="content-wrap"], [class*="app-body"] { background-color: #1a1209 !important; }
+p, span, li, td, th, dt, dd, label, blockquote,
+figcaption, address, cite, small, time,
+strong, em, b, i { color: #e8d5a3 !important; }
+h1, h2, h3, h4, h5, h6 { color: #f0c060 !important; }
+a         { color: #d4956a !important; }
+a:visited { color: #a06040 !important; }
+a:hover   { color: #f0c060 !important; }
+::selection { background: #f0c060 !important; color: #1a1209 !important; }
+input, textarea, select {
+  background-color: #241a0c !important;
+  color: #e8d5a3 !important;
+  border-color: #6b4c1e !important;
+}
+body, p, span, li, td, th, label, div,
+input, textarea, select, button, blockquote {
+  font-family: 'Georgia', 'Times New Roman', serif !important;
+  font-size: 16px !important;
+  line-height: 1.75 !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+code, pre { background: #241a0c !important; color: #d4956a !important; border-color: #6b4c1e !important; }
+`,
+  },
+];
+
 const DEFAULT_TOGGLES: PolishToggles = {
   moreContrast: false,
   darkMode: false,
@@ -43,9 +271,31 @@ const DEFAULT_TOGGLES: PolishToggles = {
 
 const STORAGE_KEY = 'polish_presets';
 
+// ── Per-site state ─────────────────────────────────────────────────────────
+// Keyed by hostname, e.g. "polish_site_nytimes.com"
+const SITE_KEY_PREFIX = 'polish_site_';
+
+export interface SiteState {
+  selectedPreset: string;
+  toggles: PolishToggles;
+  lastAppliedCSS: string | null;
+  lastAppliedSource: 'toggles' | 'ai' | null;
+  activePresetId: string | null;
+}
+
+async function getCurrentHostname(): Promise<string | null> {
+  return new Promise((resolve) => {
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+      const url = tabs[0]?.url;
+      if (!url) return resolve(null);
+      try { resolve(new URL(url).hostname); } catch { resolve(null); }
+    });
+  });
+}
+
 export const usePolishStore = defineStore('polish', () => {
   // ── State ──────────────────────────────────────────────────────────────────
-  const selectedPreset = ref('Cyber Mode');
+  const selectedPreset = ref('');  // '' = no preset selected
   const toggles = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
   const fineTune = reactive<FineTuneState>({ ...DEFAULT_FINETUNE });
   const aiPrompt = ref('');
@@ -59,19 +309,84 @@ export const usePolishStore = defineStore('polish', () => {
 
   // ── Init — called explicitly from main.ts after app mounts ────────────────
   // NOT called at module load time — chrome.storage isn't ready yet then.
-  function init() {
+  async function init() {
+    // Load user presets
     chrome.storage.local.get(STORAGE_KEY, (result) => {
-      if (result[STORAGE_KEY]) {
-        presets.value = result[STORAGE_KEY] as UserPreset[];
+      if (result[STORAGE_KEY]) presets.value = result[STORAGE_KEY] as UserPreset[];
+    });
+
+    // Load state for the current active tab
+    await loadSiteState();
+
+    // Listen for tab switches — reload state when user switches tabs
+    chrome.tabs.onActivated.addListener(() => loadSiteState());
+    chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
+      if (changeInfo.status === 'complete') loadSiteState();
+    });
+  }
+
+  async function loadSiteState() {
+    const hostname = await getCurrentHostname();
+    if (!hostname) return;
+
+    const key = SITE_KEY_PREFIX + hostname;
+    chrome.storage.local.get(key, (result) => {
+      const saved = result[key] as SiteState | undefined;
+      if (saved) {
+        selectedPreset.value = saved.selectedPreset ?? '';
+        Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
+        lastAppliedCSS.value = saved.lastAppliedCSS ?? null;
+        lastAppliedSource.value = saved.lastAppliedSource ?? null;
+        activePresetId.value = saved.activePresetId ?? null;
+      } else {
+        // New site — reset to clean state (do NOT remove CSS already on the page)
+        selectedPreset.value = '';
+        Object.assign(toggles, DEFAULT_TOGGLES);
+        lastAppliedCSS.value = null;
+        lastAppliedSource.value = null;
+        activePresetId.value = null;
       }
     });
   }
 
+  async function saveSiteState() {
+    const hostname = await getCurrentHostname();
+    if (!hostname) return;
+    const key = SITE_KEY_PREFIX + hostname;
+    const state: SiteState = {
+      selectedPreset: selectedPreset.value,
+      toggles: { ...toggles },
+      lastAppliedCSS: lastAppliedCSS.value,
+      lastAppliedSource: lastAppliedSource.value,
+      activePresetId: activePresetId.value,
+    };
+    chrome.storage.local.set({ [key]: state });
+  }
+
   // ── Core Actions ───────────────────────────────────────────────────────────
-  function resetToDefaults() {
+  async function resetAll() {
+    selectedPreset.value = '';
     Object.assign(toggles, DEFAULT_TOGGLES);
-    selectedPreset.value = 'Cyber Mode';
+    Object.assign(fineTune, DEFAULT_FINETUNE);
     aiPrompt.value = '';
+    lastAppliedCSS.value = null;
+    lastAppliedSource.value = null;
+    activePresetId.value = null;
+    await sendCSSToPage('');
+  }
+
+  // Keep alias for any legacy calls
+  function resetToDefaults() { resetAll(); }
+
+  async function applySystemPreset(id: string) {
+    const preset = SYSTEM_PRESETS.find((p) => p.id === id);
+    if (!preset) return;
+    selectedPreset.value = id;
+    await sendCSSToPage(preset.css.trim());
+    lastAppliedCSS.value = preset.css.trim();
+    lastAppliedSource.value = 'toggles';
+    activePresetId.value = null;
+    await saveSiteState();
   }
 
   function resetFineTune() {
@@ -100,6 +415,7 @@ export const usePolishStore = defineStore('polish', () => {
       lastAppliedCSS.value = css;
       lastAppliedSource.value = 'toggles';
       activePresetId.value = null;
+      await saveSiteState();
     } finally {
       isPolishing.value = false;
     }
@@ -113,6 +429,7 @@ export const usePolishStore = defineStore('polish', () => {
       lastAppliedCSS.value = css;
       lastAppliedSource.value = 'ai';
       activePresetId.value = null;
+      await saveSiteState();
     } finally {
       isGenerating.value = false;
     }
@@ -123,6 +440,7 @@ export const usePolishStore = defineStore('polish', () => {
     lastAppliedCSS.value = null;
     lastAppliedSource.value = null;
     activePresetId.value = null;
+    await saveSiteState();
   }
 
   // ── Preset Actions ─────────────────────────────────────────────────────────
@@ -496,10 +814,13 @@ input, textarea, select, button, blockquote {
     presets,
     activePresetId,
     init,
+    loadSiteState,
     fineTune,
     resetFineTune,
     applyFineTune,
+    resetAll,
     resetToDefaults,
+    applySystemPreset,
     setToggle,
     applyPolish,
     generateAiStyle,

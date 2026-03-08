@@ -22,17 +22,26 @@ defineEmits<{ openPresets: [] }>();
       Apply automatically on this site
     </label>
 
-    <button
-      class="flex items-center gap-1.5 font-mono text-[11px] text-polish-magenta py-1.5 pt-2 border-t border-[#111128] mt-1 w-full bg-transparent hover:text-polish-yellow transition-colors cursor-pointer border-l-0 border-r-0 border-b-0"
-      @click="$emit('openPresets')"
-    >
-      <svg viewBox="0 0 12 12" width="12" height="12" fill="currentColor" class="shrink-0">
-        <rect x="0" y="0" width="5" height="5" rx="1"/>
-        <rect x="7" y="0" width="5" height="5" rx="1"/>
-        <rect x="0" y="7" width="5" height="5" rx="1"/>
-        <rect x="7" y="7" width="5" height="5" rx="1"/>
-      </svg>
-      Manage presets..
-    </button>
+    <div class="flex items-center justify-between pt-2 mt-1 border-t border-[#111128]">
+      <button
+        class="flex items-center gap-1.5 font-mono text-[11px] text-polish-magenta bg-transparent hover:text-polish-yellow transition-colors cursor-pointer"
+        @click="$emit('openPresets')"
+      >
+        <svg viewBox="0 0 12 12" width="12" height="12" fill="currentColor" class="shrink-0">
+          <rect x="0" y="0" width="5" height="5" rx="1"/>
+          <rect x="7" y="0" width="5" height="5" rx="1"/>
+          <rect x="0" y="7" width="5" height="5" rx="1"/>
+          <rect x="7" y="7" width="5" height="5" rx="1"/>
+        </svg>
+        Manage presets..
+      </button>
+
+      <button
+        class="font-pixel text-[8px] px-3 py-1.5 border-2 border-polish-red text-polish-red [box-shadow:0_0_8px_rgba(255,34,68,0.25)] hover:[box-shadow:0_0_16px_rgba(255,34,68,0.6)] hover:bg-polish-red/10 transition-all cursor-pointer bg-transparent"
+        @click="store.resetAll()"
+      >
+        RESET ALL
+      </button>
+    </div>
   </footer>
 </template>

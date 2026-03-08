@@ -24,8 +24,9 @@ function scrollToPresets() {
 
     <PanelHeader @open-list="() => {}" @close="closePanel" />
 
-    <p class="px-3 py-1.25 font-vt text-[15px] text-polish-dim border-b border-[#111128] tracking-wider shrink-0">
-      <span class="text-polish-green">>&nbsp;</span>Refine the web you're on
+    <p class="px-3 py-1.25 font-mono text-[10px] text-polish-dim border-b border-[#111128] tracking-widest uppercase shrink-0 flex items-center gap-2">
+      <span class="inline-block w-1.5 h-1.5 bg-polish-yellow rounded-full [box-shadow:0_0_6px_var(--color-polish-yellow)] shrink-0"></span>
+      Refine the web you're on
     </p>
 
     <ThemePresetBar />
