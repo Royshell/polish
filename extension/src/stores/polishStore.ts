@@ -281,6 +281,7 @@ export interface SiteState {
   lastAppliedCSS: string | null;
   lastAppliedSource: 'toggles' | 'ai' | null;
   activePresetId: string | null;
+  autoApply: boolean;
 }
 
 async function getCurrentHostname(): Promise<string | null> {
@@ -338,6 +339,12 @@ export const usePolishStore = defineStore('polish', () => {
         lastAppliedCSS.value = saved.lastAppliedCSS ?? null;
         lastAppliedSource.value = saved.lastAppliedSource ?? null;
         activePresetId.value = saved.activePresetId ?? null;
+        autoApply.value = saved.autoApply ?? false;
+
+        // Auto-apply: if enabled and CSS exists, re-inject on page load/navigation
+        if (saved.autoApply && saved.lastAppliedCSS) {
+          sendCSSToPage(saved.lastAppliedCSS).catch(() => {});
+        }
       } else {
         // New site — reset to clean state (do NOT remove CSS already on the page)
         selectedPreset.value = '';
@@ -345,6 +352,7 @@ export const usePolishStore = defineStore('polish', () => {
         lastAppliedCSS.value = null;
         lastAppliedSource.value = null;
         activePresetId.value = null;
+        autoApply.value = false;
       }
     });
   }
@@ -359,6 +367,7 @@ export const usePolishStore = defineStore('polish', () => {
       lastAppliedCSS: lastAppliedCSS.value,
       lastAppliedSource: lastAppliedSource.value,
       activePresetId: activePresetId.value,
+      autoApply: autoApply.value,
     };
     chrome.storage.local.set({ [key]: state });
   }
@@ -798,6 +807,11 @@ input, textarea, select, button, blockquote {
     });
   }
 
+  async function toggleAutoApply() {
+    autoApply.value = !autoApply.value;
+    await saveSiteState();
+  }
+
   async function persistPresets(): Promise<void> {
     await chrome.storage.local.set({ [STORAGE_KEY]: presets.value });
   }
@@ -829,5 +843,6 @@ input, textarea, select, button, blockquote {
     applyPreset,
     deletePreset,
     renamePreset,
+    toggleAutoApply,
   };
 });

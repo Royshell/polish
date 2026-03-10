@@ -15,7 +15,7 @@ defineEmits<{ openPresets: [] }>();
         :class="store.autoApply
           ? 'border-polish-cyan bg-polish-cyan/12 text-polish-cyan [box-shadow:0_0_6px_rgba(0,229,255,0.3)]'
           : 'border-polish-dim bg-transparent text-transparent'"
-        @click="store.autoApply = !store.autoApply"
+        @click="store.toggleAutoApply()"
       >
         ✓
       </div>

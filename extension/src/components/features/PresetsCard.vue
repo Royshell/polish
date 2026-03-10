@@ -205,14 +205,15 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
         :class="
           canSave
             ? 'text-polish-green hover:text-polish-yellow cursor-pointer'
-            : 'text-polish-dim cursor-not-allowed opacity-50'
+            : 'text-polish-dim cursor-not-allowed opacity-40'
         "
         :disabled="!canSave"
-        :title="canSave ? 'Save current style as preset' : 'Apply a style first'"
+        :title="canSave ? 'Save current style as preset' : 'Apply a style first (click Polish it! or Generate)'"
         @click="canSave && startSave()"
       >
         <span class="text-[14px] leading-none">+</span>
         Save current style
+        <span v-if="!canSave" class="ml-auto text-[9px] opacity-60">— apply first</span>
       </button>
     </div>
   </SectionCard>
