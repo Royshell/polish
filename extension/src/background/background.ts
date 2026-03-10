@@ -1,124 +1,109 @@
+// ── Polish Extension — Background Service Worker ───────────────────────────
+//
+// All privileged operations run here:
+//   • APPLY_CSS   — inject/remove <style> + optional <link> into the active tab
+//   • GENERATE_CSS — call Polish API proxy, return clean CSS to the side panel
+//
+// Why here and not in the side panel?
+//   Chrome MV3 side panels cannot use chrome.scripting or make cross-origin
+//   fetch calls without CORS issues. The service worker has both scripting
+//   permissions and unrestricted fetch access.
+
+// ── Panel behaviour ────────────────────────────────────────────────────────
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
-  .catch((error) => console.error(error));
+  .catch((err) => console.error('[Polish] sidePanel:', err));
 
-chrome.runtime.onInstalled.addListener(() => {
-  console.log('Polish Extension Installed');
-});
+// ── Helpers injected into the page via executeScript ──────────────────────
+// These functions run INSIDE the target tab's page context, not here.
 
-// ── CSS Injection ──────────────────────────────────────────────────────────
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === 'APPLY_CSS') {
-    injectCSS(message.css as string, message.injectFontLink as boolean)
-      .then(() => sendResponse({ ok: true }))
-      .catch((err) => sendResponse({ ok: false, error: String(err) }));
-    return true;
-  }
-});
-
-async function injectCSS(css: string, injectFontLink: boolean): Promise<void> {
-  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-  if (!tab?.id) throw new Error('No active tab found');
-
-  // 1. Inject the font <link> tag (needed because @import doesn't work in textContent)
-  await chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    func: manageFontLink,
-    args: [injectFontLink],
-  });
-
-  // 2. Inject the CSS rules
-  await chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    func: applyStyleToPage,
-    args: [css, 'polish-injected'],
-  });
-}
-
-// Runs INSIDE the page — manages the Google Fonts <link> tag
-function manageFontLink(inject: boolean): void {
-  const LINK_ID = 'polish-font-link';
-  const existing = document.getElementById(LINK_ID);
-
-  if (!inject) {
-    existing?.remove();
-    return;
-  }
-
-  if (!existing) {
-    const link = document.createElement('link');
-    link.id = LINK_ID;
-    link.rel = 'stylesheet';
-    link.href =
-      'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
-    document.head.appendChild(link);
+/** Inject or remove the Inter font <link> tag. */
+function manageFontLink(inject: boolean) {
+  const ID = 'polish-font-link';
+  if (inject) {
+    if (!document.getElementById(ID)) {
+      const link = document.createElement('link');
+      link.id = ID;
+      link.rel = 'stylesheet';
+      link.href =
+        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
+      document.head.appendChild(link);
+    }
+  } else {
+    document.getElementById(ID)?.remove();
   }
 }
 
-// Runs INSIDE the page — injects/updates/removes the style tag
-function applyStyleToPage(css: string, styleId: string): void {
+/** Inject, update, or remove the main <style> tag. */
+function applyStyleToPage(css: string, styleId: string) {
   let el = document.getElementById(styleId) as HTMLStyleElement | null;
-
-  if (!css || css.trim() === '') {
+  if (!css) {
     el?.remove();
-    // also remove font link on full revert
-    document.getElementById('polish-font-link')?.remove();
     return;
   }
-
   if (!el) {
     el = document.createElement('style');
     el.id = styleId;
     document.head.appendChild(el);
   }
-
   el.textContent = css;
 }
 
-// ── AI CSS Generation ──────────────────────────────────────────────────────
+// ── CSS injection ──────────────────────────────────────────────────────────
+async function injectCSS(css: string, injectFontLink: boolean): Promise<void> {
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  if (!tab?.id) throw new Error('No active tab found');
+
+  const tabId = tab.id;
+
+  await chrome.scripting.executeScript({
+    target: { tabId },
+    func: manageFontLink,
+    args: [injectFontLink],
+  });
+
+  await chrome.scripting.executeScript({
+    target: { tabId },
+    func: applyStyleToPage,
+    args: [css, 'polish-injected'],
+  });
+}
+
+// ── Polish API proxy ───────────────────────────────────────────────────────
+// The Groq key lives on the server — never in the extension bundle.
+const POLISH_API_URL = 'https://polish-api-alpha.vercel.app/api/generate';
+
+async function generateCSSFromPrompt(prompt: string): Promise<string> {
+  const response = await fetch(POLISH_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    if (response.status === 429) throw new Error('Rate limit — try again in a moment');
+    throw new Error(err?.error ?? `API error ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.css ?? '';
+}
+
+// ── Message router ─────────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+
+  if (message.type === 'APPLY_CSS') {
+    injectCSS(message.css ?? '', message.injectFontLink ?? false)
+      .then(() => sendResponse({ ok: true }))
+      .catch((err) => sendResponse({ ok: false, error: String(err) }));
+    return true;
+  }
+
   if (message.type === 'GENERATE_CSS') {
-    generateCSSFromPrompt(message.prompt as string)
+    generateCSSFromPrompt(message.prompt)
       .then((css) => sendResponse({ css }))
       .catch((err) => sendResponse({ error: String(err) }));
     return true;
   }
 });
-
-async function generateCSSFromPrompt(userPrompt: string): Promise<string> {
-  const { apiKey } = await chrome.storage.local.get('apiKey');
-  if (!apiKey) throw new Error('No API key set');
-
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey as string,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      system: `You are an expert CSS designer.
-Respond ONLY with valid CSS that can be injected into any webpage via a <style> tag.
-Use !important on all rules to ensure they override existing styles.
-Target broad selectors: body, div, p, h1-h6, span, a, li, section, article, main.
-Output raw CSS only — no markdown, no explanation, no backticks.
-Keep output under 120 lines.`,
-      messages: [{ role: 'user', content: userPrompt }],
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error((err as { error?: { message?: string } })?.error?.message ?? 'API error');
-  }
-
-  const data = await response.json() as { content: { type: string; text: string }[] };
-  return data.content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('')
-    .replace(/```(?:css)?/gi, '')
-    .trim();
-}
