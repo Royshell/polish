@@ -1,4 +1,4 @@
-import { ref, reactive } from 'vue';
+import { ref, reactive, toRaw } from 'vue';
 import { defineStore } from 'pinia';
 
 export interface PolishToggles {
@@ -281,7 +281,6 @@ export interface SiteState {
   lastAppliedCSS: string | null;
   lastAppliedSource: 'toggles' | 'ai' | null;
   activePresetId: string | null;
-  autoApply: boolean;
 }
 
 async function getCurrentHostname(): Promise<string | null> {
@@ -311,9 +310,14 @@ export const usePolishStore = defineStore('polish', () => {
   // ── Init — called explicitly from main.ts after app mounts ────────────────
   // NOT called at module load time — chrome.storage isn't ready yet then.
   async function init() {
-    // Load user presets
-    chrome.storage.local.get(STORAGE_KEY, (result) => {
-      if (result[STORAGE_KEY]) presets.value = result[STORAGE_KEY] as UserPreset[];
+    // Load user presets — wrap in Promise so we actually await the callback
+    await new Promise<void>((resolve) => {
+      chrome.storage.local.get(STORAGE_KEY, (result) => {
+        if (Array.isArray(result[STORAGE_KEY])) {
+          presets.value = result[STORAGE_KEY] as UserPreset[];
+        }
+        resolve();
+      });
     });
 
     // Load state for the current active tab
@@ -339,12 +343,6 @@ export const usePolishStore = defineStore('polish', () => {
         lastAppliedCSS.value = saved.lastAppliedCSS ?? null;
         lastAppliedSource.value = saved.lastAppliedSource ?? null;
         activePresetId.value = saved.activePresetId ?? null;
-        autoApply.value = saved.autoApply ?? false;
-
-        // Auto-apply: if enabled and CSS exists, re-inject on page load/navigation
-        if (saved.autoApply && saved.lastAppliedCSS) {
-          sendCSSToPage(saved.lastAppliedCSS).catch(() => {});
-        }
       } else {
         // New site — reset to clean state (do NOT remove CSS already on the page)
         selectedPreset.value = '';
@@ -352,7 +350,6 @@ export const usePolishStore = defineStore('polish', () => {
         lastAppliedCSS.value = null;
         lastAppliedSource.value = null;
         activePresetId.value = null;
-        autoApply.value = false;
       }
     });
   }
@@ -363,11 +360,10 @@ export const usePolishStore = defineStore('polish', () => {
     const key = SITE_KEY_PREFIX + hostname;
     const state: SiteState = {
       selectedPreset: selectedPreset.value,
-      toggles: { ...toggles },
+      toggles: { ...toRaw(toggles) },
       lastAppliedCSS: lastAppliedCSS.value,
       lastAppliedSource: lastAppliedSource.value,
       activePresetId: activePresetId.value,
-      autoApply: autoApply.value,
     };
     chrome.storage.local.set({ [key]: state });
   }
@@ -807,13 +803,14 @@ input, textarea, select, button, blockquote {
     });
   }
 
+  async function persistPresets(): Promise<void> {
+    const raw = JSON.parse(JSON.stringify(toRaw(presets.value)));
+    await chrome.storage.local.set({ [STORAGE_KEY]: raw });
+  }
+
   async function toggleAutoApply() {
     autoApply.value = !autoApply.value;
     await saveSiteState();
-  }
-
-  async function persistPresets(): Promise<void> {
-    await chrome.storage.local.set({ [STORAGE_KEY]: presets.value });
   }
 
   return {

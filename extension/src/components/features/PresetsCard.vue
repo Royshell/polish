@@ -11,7 +11,7 @@ const saveName = ref("");
 const saveInput = ref<HTMLInputElement | null>(null);
 
 function startSave() {
-  const count = store.presets.length + 1;
+  const count = (store.presets?.length ?? 0) + 1;
   saveName.value =
     store.lastAppliedSource === "ai" ? `AI Style ${count}` : `Polish ${count}`;
   isSaving.value = true;
@@ -140,10 +140,10 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
           "
         >
           <button
-            class="font-pixel text-[7px] px-[6px] py-[3px] border transition-all"
+            class="font-pixel text-[7px] px-[6px] py-[3px] border transition-all cursor-pointer"
             :class="
               store.activePresetId === preset.id
-                ? 'border-polish-green text-polish-green bg-polish-green/10 cursor-default'
+                ? 'border-polish-green text-polish-green bg-polish-green/10'
                 : 'border-polish-dim text-polish-dim hover:border-polish-green hover:text-polish-green'
             "
             :title="store.activePresetId === preset.id ? 'Active' : 'Apply'"
@@ -153,7 +153,7 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
           </button>
 
           <button
-            class="font-pixel text-[7px] px-[6px] py-[3px] border border-polish-dim text-polish-dim hover:border-polish-red hover:text-polish-red transition-all"
+            class="font-pixel text-[7px] px-[6px] py-[3px] border border-polish-dim text-polish-dim hover:border-polish-red hover:text-polish-red transition-all cursor-pointer"
             title="Delete"
             @click="store.deletePreset(preset.id)"
           >
@@ -165,7 +165,7 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
       <!-- Show more / less -->
       <button
         v-if="hiddenCount > 0 || showAll"
-        class="font-mono text-[10px] text-polish-dim hover:text-polish-cyan transition-colors py-1 text-left"
+        class="font-mono text-[10px] text-polish-dim hover:text-polish-cyan transition-colors py-1 text-left cursor-pointer"
         @click="showAll = !showAll"
       >
         {{ showAll ? "▲ Show less" : `▼ +${hiddenCount} more` }}
@@ -185,13 +185,13 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
           @keydown="handleSaveKeydown"
         />
         <button
-          class="font-pixel text-[7px] px-[7px] py-[5px] bg-[#002200] border-2 border-polish-green text-polish-green hover:bg-polish-green hover:text-black transition-all"
+          class="font-pixel text-[7px] px-[7px] py-[5px] bg-[#002200] border-2 border-polish-green text-polish-green hover:bg-polish-green hover:text-black transition-all cursor-pointer"
           @click="confirmSave"
         >
           ✓
         </button>
         <button
-          class="font-pixel text-[7px] px-[7px] py-[5px] bg-[#1a0808] border-2 border-polish-dim text-polish-dim hover:border-polish-red hover:text-polish-red transition-all"
+          class="font-pixel text-[7px] px-[7px] py-[5px] bg-[#1a0808] border-2 border-polish-dim text-polish-dim hover:border-polish-red hover:text-polish-red transition-all cursor-pointer"
           @click="cancelSave"
         >
           ✕
@@ -205,15 +205,14 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
         :class="
           canSave
             ? 'text-polish-green hover:text-polish-yellow cursor-pointer'
-            : 'text-polish-dim cursor-not-allowed opacity-40'
+            : 'text-polish-dim cursor-not-allowed opacity-50'
         "
         :disabled="!canSave"
-        :title="canSave ? 'Save current style as preset' : 'Apply a style first (click Polish it! or Generate)'"
+        :title="canSave ? 'Save current style as preset' : 'Apply a style first'"
         @click="canSave && startSave()"
       >
         <span class="text-[14px] leading-none">+</span>
         Save current style
-        <span v-if="!canSave" class="ml-auto text-[9px] opacity-60">— apply first</span>
       </button>
     </div>
   </SectionCard>
