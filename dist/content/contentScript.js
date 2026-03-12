@@ -1,1 +1,0 @@
-const n="polish-injected";chrome.runtime.onMessage.addListener(t=>{if(t.type!=="APPLY_CSS")return;if(!t.css||t.css.trim()===""){document.getElementById(n)?.remove();return}let e=document.getElementById(n);e||(e=document.createElement("style"),e.id=n,document.head.appendChild(e)),console.log("injecting css!"),e.textContent=t.css});
