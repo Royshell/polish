@@ -330,23 +330,17 @@ export const usePolishStore = defineStore('polish', () => {
     chrome.storage.local.get(key, (result) => {
       const saved = result[key] as SiteState | undefined;
       if (saved) {
-        selectedPreset.value    = saved.selectedPreset ?? '';
+        // Only restore selected preset if CSS will actually be re-injected
+        selectedPreset.value    = (saved.autoApply && saved.lastAppliedCSS) ? (saved.selectedPreset ?? '') : '';
         lastAppliedCSS.value    = saved.lastAppliedCSS ?? null;
         lastAppliedSource.value = saved.lastAppliedSource ?? null;
         activePresetId.value    = saved.activePresetId ?? null;
-        autoApply.value         = saved.autoApply ?? false;
         Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
-
-        // Re-inject CSS if autoApply is on and we have a saved style
-        if (saved.autoApply && saved.lastAppliedCSS) {
-          sendCSSToPage(saved.lastAppliedCSS);
-        }
       } else {
         selectedPreset.value    = '';
         lastAppliedCSS.value    = null;
         lastAppliedSource.value = null;
         activePresetId.value    = null;
-        autoApply.value         = false;
         Object.assign(toggles, DEFAULT_TOGGLES);
       }
     });
