@@ -1,0 +1,102 @@
+.
+├── extension
+│   ├── README.md
+│   ├── dist
+│   │   ├── assets
+│   │   │   └── sidebar-nasgjHhZ.css
+│   │   ├── background
+│   │   │   └── background.js
+│   │   ├── content
+│   │   │   ├── contentScript.js
+│   │   │   └── injected
+│   │   ├── icons
+│   │   │   ├── icon-128.png
+│   │   │   ├── icon-16.png
+│   │   │   ├── icon-32.png
+│   │   │   └── icon-48.png
+│   │   └── vite.svg
+│   ├── env.d.ts
+│   ├── index.html
+│   ├── manifest.json
+│   ├── package.json
+│   ├── pnpm-lock.yaml
+│   ├── public
+│   │   ├── icons
+│   │   │   ├── icon-128.png
+│   │   │   ├── icon-16.png
+│   │   │   ├── icon-32.png
+│   │   │   └── icon-48.png
+│   │   └── vite.svg
+│   ├── scripts
+│   │   └── generate-icons.mjs
+│   ├── src
+│   │   ├── App.vue
+│   │   ├── assets
+│   │   │   └── vue.svg
+│   │   ├── background
+│   │   │   └── background.ts
+│   │   ├── components
+│   │   │   └── HelloWorld.vue
+│   │   ├── content
+│   │   │   ├── contentScript.ts
+│   │   │   └── injected
+│   │   ├── main.ts
+│   │   └── style.css
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
+└── tree.txt
+
+17 directories, 32 files
+.
+├── extension
+│   ├── README.md
+│   ├── dist
+│   │   ├── assets
+│   │   │   └── sidebar-nasgjHhZ.css
+│   │   ├── background
+│   │   │   └── background.js
+│   │   ├── content
+│   │   │   ├── contentScript.js
+│   │   │   └── injected
+│   │   ├── icons
+│   │   │   ├── icon-128.png
+│   │   │   ├── icon-16.png
+│   │   │   ├── icon-32.png
+│   │   │   └── icon-48.png
+│   │   └── vite.svg
+│   ├── env.d.ts
+│   ├── index.html
+│   ├── manifest.json
+│   ├── package.json
+│   ├── pnpm-lock.yaml
+│   ├── public
+│   │   ├── icons
+│   │   │   ├── icon-128.png
+│   │   │   ├── icon-16.png
+│   │   │   ├── icon-32.png
+│   │   │   └── icon-48.png
+│   │   └── vite.svg
+│   ├── scripts
+│   │   └── generate-icons.mjs
+│   ├── src
+│   │   ├── App.vue
+│   │   ├── assets
+│   │   │   └── vue.svg
+│   │   ├── background
+│   │   │   └── background.ts
+│   │   ├── components
+│   │   │   └── HelloWorld.vue
+│   │   ├── content
+│   │   │   ├── contentScript.ts
+│   │   │   └── injected
+│   │   ├── main.ts
+│   │   └── style.css
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
+└── tree.txt
+
+17 directories, 32 files

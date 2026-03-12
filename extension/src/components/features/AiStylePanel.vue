@@ -70,13 +70,10 @@ function handleKeydown(e: KeyboardEvent) {
       </template>
       <template v-else>
         <span>Generate</span>
-        <svg
+        <span
           class="animate-[arrowPulse_0.8s_ease-in-out_infinite_alternate]"
-          width="14" height="14" viewBox="0 0 14 14" fill="currentColor"
-          style="display: inline-block; vertical-align: middle; position: relative; top: -1px; flex-shrink: 0;"
-        >
-          <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+          style="font-size: 13px; line-height: 1; display: inline-flex; align-items: center; position: relative; top: -1px; letter-spacing: -2px;"
+        >&gt;&gt;</span>
       </template>
     </button>
 
