@@ -59,11 +59,9 @@ function clearFineTune() {
         >Fine-Tune</span>
       </span>
       <span
-        class="font-pixel text-[8px] transition-all duration-200"
+        class="font-pixel text-[8px] transition-colors duration-200"
         :class="open ? 'text-polish-cyan' : 'text-polish-dim'"
-        :class2="open ? 'rotate-180' : ''"
         style="line-height: 1; position: relative; top: 1px;"
-        :style2="open ? 'transform: rotate(180deg)' : ''"
       >{{ open ? '▴' : '▾' }}</span>
     </button>
 

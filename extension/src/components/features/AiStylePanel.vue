@@ -74,10 +74,6 @@ function handleKeydown(e: KeyboardEvent) {
       </template>
       <template v-else>
         <span>GENERATE</span>
-        <span
-          class="ml-2 mb-1 animate-[arrowPulse_0.8s_ease-in-out_infinite_alternate] text-[8px]"
-          >&#x25B6;</span
-        >
       </template>
     </button>
   </SectionCard>
