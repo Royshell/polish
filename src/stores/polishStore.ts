@@ -32,6 +32,7 @@ export interface SiteState {
   lastAppliedCSS:    string | null;
   lastAppliedSource: 'toggles' | 'ai' | null;
   activePresetId:    string | null;
+  autoApply:         boolean;
 }
 
 export interface SystemPreset {
@@ -333,12 +334,19 @@ export const usePolishStore = defineStore('polish', () => {
         lastAppliedCSS.value    = saved.lastAppliedCSS ?? null;
         lastAppliedSource.value = saved.lastAppliedSource ?? null;
         activePresetId.value    = saved.activePresetId ?? null;
+        autoApply.value         = saved.autoApply ?? false;
         Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
+
+        // Re-inject CSS if autoApply is on and we have a saved style
+        if (saved.autoApply && saved.lastAppliedCSS) {
+          sendCSSToPage(saved.lastAppliedCSS);
+        }
       } else {
         selectedPreset.value    = '';
         lastAppliedCSS.value    = null;
         lastAppliedSource.value = null;
         activePresetId.value    = null;
+        autoApply.value         = false;
         Object.assign(toggles, DEFAULT_TOGGLES);
       }
     });
@@ -353,6 +361,7 @@ export const usePolishStore = defineStore('polish', () => {
       lastAppliedCSS:    lastAppliedCSS.value,
       lastAppliedSource: lastAppliedSource.value,
       activePresetId:    activePresetId.value,
+      autoApply:         autoApply.value,
     };
     chrome.storage.local.set({ [SITE_KEY_PREFIX + hostname]: state });
   }
@@ -370,7 +379,7 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function applySystemPreset(id: string) {
-    const preset = SYSTEM_PRESETS.find((preset) => preset.id === id);
+    const preset = SYSTEM_PRESETS.find((p) => p.id === id);
     if (!preset) return;
     selectedPreset.value    = id;
     lastAppliedCSS.value    = preset.css.trim();
@@ -405,7 +414,6 @@ export const usePolishStore = defineStore('polish', () => {
       lastAppliedCSS.value    = css;
       lastAppliedSource.value = 'toggles';
       activePresetId.value    = null;
-      selectedPreset.value    = ''; // themes and toggles are separate modes
       await saveSiteState();
     } finally {
       isPolishing.value = false;
@@ -450,7 +458,7 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function applyPreset(id: string) {
-    const preset = presets.value.find((preset) => preset.id === id);
+    const preset = presets.value.find((p) => p.id === id);
     if (!preset) return;
     lastAppliedCSS.value    = preset.css;
     lastAppliedSource.value = preset.source;
@@ -459,13 +467,13 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function deletePreset(id: string) {
-    presets.value = presets.value.filter((preset) => preset.id !== id);
+    presets.value = presets.value.filter((p) => p.id !== id);
     if (activePresetId.value === id) activePresetId.value = null;
     await persistPresets();
   }
 
   async function renamePreset(id: string, newName: string) {
-    const preset = presets.value.find((preset) => preset.id === id);
+    const preset = presets.value.find((p) => p.id === id);
     if (preset) {
       preset.name = newName.trim();
       await persistPresets();
