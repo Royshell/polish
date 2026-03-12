@@ -1,43 +1,61 @@
 import { ref, reactive, toRaw } from 'vue';
 import { defineStore } from 'pinia';
+import { STORAGE_KEY, SITE_KEY_PREFIX } from '../constants';
 
 export interface PolishToggles {
   moreContrast: boolean;
-  darkMode: boolean;
-  focusMode: boolean;
+  darkMode:     boolean;
+  focusMode:    boolean;
   extraSpacing: boolean;
-  readable: boolean;
+  readable:     boolean;
 }
 
 export interface UserPreset {
-  id: string;
-  name: string;
-  css: string;
-  source: 'toggles' | 'ai';
+  id:        string;
+  name:      string;
+  css:       string;
+  source:    'toggles' | 'ai';
   createdAt: number;
 }
 
 export interface FineTuneState {
-  bodyFontSize: number;   // 12–22px
-  headingScale: number;   // 0.8–2.0x
-  bgColor: string;        // '' = not applied
-  textColor: string;      // '' = not applied
-  fontFamily: string;     // '' | 'inter' | 'georgia' | 'merriweather' | 'mono'
+  bodyFontSize: number;  // 12–22px
+  headingScale: number;  // 0.8–2.0x
+  bgColor:      string;  // '' = not applied
+  textColor:    string;  // '' = not applied
+  fontFamily:   string;  // '' | 'inter' | 'georgia' | 'merriweather' | 'mono'
 }
+
+export interface SiteState {
+  selectedPreset:    string;
+  toggles:           PolishToggles;
+  lastAppliedCSS:    string | null;
+  lastAppliedSource: 'toggles' | 'ai' | null;
+  activePresetId:    string | null;
+}
+
+export interface SystemPreset {
+  id:    string;
+  label: string;
+  css:   string;
+}
+
+// ── Defaults ───────────────────────────────────────────────────────────────
+const DEFAULT_TOGGLES: PolishToggles = {
+  moreContrast: false,
+  darkMode:     false,
+  focusMode:    false,
+  extraSpacing: false,
+  readable:     false,
+};
 
 const DEFAULT_FINETUNE: FineTuneState = {
   bodyFontSize: 16,
   headingScale: 1.0,
-  bgColor: '',
-  textColor: '',
-  fontFamily: '',
+  bgColor:      '',
+  textColor:    '',
+  fontFamily:   '',
 };
-
-export interface SystemPreset {
-  id: string;
-  label: string;
-  css: string;
-}
 
 // ── System Presets ─────────────────────────────────────────────────────────
 export const SYSTEM_PRESETS: SystemPreset[] = [
@@ -59,17 +77,14 @@ main, article, section, header, footer, nav, aside,
 [class*="page-"], [class*="Page"],
 [class*="site-"], [id*="site-"],
 [class*="content-wrap"], [class*="app-body"] {
-  /* Deep midnight teal-blue — the night sky behind the title */
   background-color: #071428 !important;
 }
 p, span, li, td, th, dt, dd, label, blockquote,
 figcaption, address, cite, small, time,
 strong, em, b, i {
-  /* Soft cool white, like city lights reflected on water */
   color: #c8ddf0 !important;
 }
 h1, h2, h3, h4, h5, h6 {
-  /* Hot neon pink — exactly the title card color */
   color: #ff1e8e !important;
   font-family: 'Broadway BT', 'Broadway', fantasy !important;
   font-style: normal !important;
@@ -93,7 +108,6 @@ input, textarea, select {
 }
 body, p, span, li, td, th, label, div,
 input, textarea, select, button, blockquote {
-
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   font-weight: 300 !important;
   letter-spacing: 0.04em !important;
@@ -261,28 +275,7 @@ code, pre { background: #241a0c !important; color: #d4956a !important; border-co
   },
 ];
 
-const DEFAULT_TOGGLES: PolishToggles = {
-  moreContrast: false,
-  darkMode: false,
-  focusMode: false,
-  extraSpacing: false,
-  readable: false,
-};
-
-const STORAGE_KEY = 'polish_presets';
-
-// ── Per-site state ─────────────────────────────────────────────────────────
-// Keyed by hostname, e.g. "polish_site_nytimes.com"
-const SITE_KEY_PREFIX = 'polish_site_';
-
-export interface SiteState {
-  selectedPreset: string;
-  toggles: PolishToggles;
-  lastAppliedCSS: string | null;
-  lastAppliedSource: 'toggles' | 'ai' | null;
-  activePresetId: string | null;
-}
-
+// ── Store ──────────────────────────────────────────────────────────────────
 async function getCurrentHostname(): Promise<string | null> {
   return new Promise((resolve) => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
@@ -295,22 +288,22 @@ async function getCurrentHostname(): Promise<string | null> {
 
 export const usePolishStore = defineStore('polish', () => {
   // ── State ──────────────────────────────────────────────────────────────────
-  const selectedPreset = ref('');  // '' = no preset selected
-  const toggles = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
-  const fineTune = reactive<FineTuneState>({ ...DEFAULT_FINETUNE });
-  const aiPrompt = ref('');
-  const autoApply = ref(false);
-  const isPolishing = ref(false);
-  const isGenerating = ref(false);
-  const lastAppliedCSS = ref<string | null>(null);
+  const selectedPreset   = ref('');
+  const toggles          = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
+  const fineTune         = reactive<FineTuneState>({ ...DEFAULT_FINETUNE });
+  const aiPrompt         = ref('');
+  const autoApply        = ref(false);
+  const isPolishing      = ref(false);
+  const isGenerating     = ref(false);
+  const lastAppliedCSS   = ref<string | null>(null);
   const lastAppliedSource = ref<'toggles' | 'ai' | null>(null);
-  const presets = ref<UserPreset[]>([]);
-  const activePresetId = ref<string | null>(null);
+  const presets          = ref<UserPreset[]>([]);
+  const activePresetId   = ref<string | null>(null);
 
-  // ── Init — called explicitly from main.ts after app mounts ────────────────
-  // NOT called at module load time — chrome.storage isn't ready yet then.
+  // ── Init ───────────────────────────────────────────────────────────────────
+  // Called explicitly from main.ts after app mounts — chrome.storage isn't
+  // ready at module load time.
   async function init() {
-    // Load user presets — wrap in Promise so we actually await the callback
     await new Promise<void>((resolve) => {
       chrome.storage.local.get(STORAGE_KEY, (result) => {
         if (Array.isArray(result[STORAGE_KEY])) {
@@ -320,10 +313,8 @@ export const usePolishStore = defineStore('polish', () => {
       });
     });
 
-    // Load state for the current active tab
     await loadSiteState();
 
-    // Listen for tab switches — reload state when user switches tabs
     chrome.tabs.onActivated.addListener(() => loadSiteState());
     chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
       if (changeInfo.status === 'complete') loadSiteState();
@@ -338,18 +329,17 @@ export const usePolishStore = defineStore('polish', () => {
     chrome.storage.local.get(key, (result) => {
       const saved = result[key] as SiteState | undefined;
       if (saved) {
-        selectedPreset.value = saved.selectedPreset ?? '';
-        Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
-        lastAppliedCSS.value = saved.lastAppliedCSS ?? null;
+        selectedPreset.value    = saved.selectedPreset ?? '';
+        lastAppliedCSS.value    = saved.lastAppliedCSS ?? null;
         lastAppliedSource.value = saved.lastAppliedSource ?? null;
-        activePresetId.value = saved.activePresetId ?? null;
+        activePresetId.value    = saved.activePresetId ?? null;
+        Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
       } else {
-        // New site — reset to clean state (do NOT remove CSS already on the page)
-        selectedPreset.value = '';
-        Object.assign(toggles, DEFAULT_TOGGLES);
-        lastAppliedCSS.value = null;
+        selectedPreset.value    = '';
+        lastAppliedCSS.value    = null;
         lastAppliedSource.value = null;
-        activePresetId.value = null;
+        activePresetId.value    = null;
+        Object.assign(toggles, DEFAULT_TOGGLES);
       }
     });
   }
@@ -357,40 +347,36 @@ export const usePolishStore = defineStore('polish', () => {
   async function saveSiteState() {
     const hostname = await getCurrentHostname();
     if (!hostname) return;
-    const key = SITE_KEY_PREFIX + hostname;
     const state: SiteState = {
-      selectedPreset: selectedPreset.value,
-      toggles: { ...toRaw(toggles) },
-      lastAppliedCSS: lastAppliedCSS.value,
+      selectedPreset:    selectedPreset.value,
+      toggles:           { ...toRaw(toggles) },
+      lastAppliedCSS:    lastAppliedCSS.value,
       lastAppliedSource: lastAppliedSource.value,
-      activePresetId: activePresetId.value,
+      activePresetId:    activePresetId.value,
     };
-    chrome.storage.local.set({ [key]: state });
+    chrome.storage.local.set({ [SITE_KEY_PREFIX + hostname]: state });
   }
 
-  // ── Core Actions ───────────────────────────────────────────────────────────
+  // ── Actions ────────────────────────────────────────────────────────────────
   async function resetAll() {
-    selectedPreset.value = '';
-    Object.assign(toggles, DEFAULT_TOGGLES);
-    Object.assign(fineTune, DEFAULT_FINETUNE);
-    aiPrompt.value = '';
-    lastAppliedCSS.value = null;
+    selectedPreset.value    = '';
+    lastAppliedCSS.value    = null;
     lastAppliedSource.value = null;
-    activePresetId.value = null;
+    activePresetId.value    = null;
+    aiPrompt.value          = '';
+    Object.assign(toggles,  DEFAULT_TOGGLES);
+    Object.assign(fineTune, DEFAULT_FINETUNE);
     await sendCSSToPage('');
   }
-
-  // Keep alias for any legacy calls
-  function resetToDefaults() { resetAll(); }
 
   async function applySystemPreset(id: string) {
     const preset = SYSTEM_PRESETS.find((p) => p.id === id);
     if (!preset) return;
-    selectedPreset.value = id;
-    await sendCSSToPage(preset.css.trim());
-    lastAppliedCSS.value = preset.css.trim();
+    selectedPreset.value    = id;
+    lastAppliedCSS.value    = preset.css.trim();
     lastAppliedSource.value = 'toggles';
-    activePresetId.value = null;
+    activePresetId.value    = null;
+    await sendCSSToPage(preset.css.trim());
     await saveSiteState();
   }
 
@@ -400,15 +386,14 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function applyFineTune() {
-    const css = buildFineTuneCSS(fineTune);
-    // Merge with last toggle CSS so both layers coexist
+    const css      = buildFineTuneCSS(fineTune);
     const combined = [lastAppliedCSS.value ?? '', css].filter(Boolean).join('\n');
     await sendCSSToPage(combined, fineTune.fontFamily === 'inter');
   }
 
   function setToggle(key: keyof PolishToggles, value: boolean) {
-    if (key === 'moreContrast' && value) toggles.darkMode = false;
-    if (key === 'darkMode' && value) toggles.moreContrast = false;
+    if (key === 'moreContrast' && value) toggles.darkMode     = false;
+    if (key === 'darkMode'     && value) toggles.moreContrast = false;
     toggles[key] = value;
   }
 
@@ -417,9 +402,9 @@ export const usePolishStore = defineStore('polish', () => {
     try {
       const css = buildToggleCSS(toggles);
       await sendCSSToPage(css);
-      lastAppliedCSS.value = css;
+      lastAppliedCSS.value    = css;
       lastAppliedSource.value = 'toggles';
-      activePresetId.value = null;
+      activePresetId.value    = null;
       await saveSiteState();
     } finally {
       isPolishing.value = false;
@@ -431,9 +416,9 @@ export const usePolishStore = defineStore('polish', () => {
     try {
       const css = await fetchAiCSS(prompt);
       await sendCSSToPage(css);
-      lastAppliedCSS.value = css;
+      lastAppliedCSS.value    = css;
       lastAppliedSource.value = 'ai';
-      activePresetId.value = null;
+      activePresetId.value    = null;
       await saveSiteState();
     } finally {
       isGenerating.value = false;
@@ -441,25 +426,23 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function revertStyles() {
-    await sendCSSToPage('');
-    lastAppliedCSS.value = null;
+    lastAppliedCSS.value    = null;
     lastAppliedSource.value = null;
-    activePresetId.value = null;
+    activePresetId.value    = null;
+    await sendCSSToPage('');
     await saveSiteState();
   }
 
-  // ── Preset Actions ─────────────────────────────────────────────────────────
+  // ── Preset actions ─────────────────────────────────────────────────────────
   async function savePreset(name: string) {
     if (!lastAppliedCSS.value) return;
-
     const preset: UserPreset = {
-      id: `preset_${Date.now()}`,
-      name: name.trim(),
-      css: lastAppliedCSS.value,
-      source: lastAppliedSource.value ?? 'toggles',
+      id:        `preset_${Date.now()}`,
+      name:      name.trim(),
+      css:       lastAppliedCSS.value,
+      source:    lastAppliedSource.value ?? 'toggles',
       createdAt: Date.now(),
     };
-
     presets.value.push(preset);
     activePresetId.value = preset.id;
     await persistPresets();
@@ -468,10 +451,10 @@ export const usePolishStore = defineStore('polish', () => {
   async function applyPreset(id: string) {
     const preset = presets.value.find((p) => p.id === id);
     if (!preset) return;
-    await sendCSSToPage(preset.css);
-    lastAppliedCSS.value = preset.css;
+    lastAppliedCSS.value    = preset.css;
     lastAppliedSource.value = preset.source;
-    activePresetId.value = id;
+    activePresetId.value    = id;
+    await sendCSSToPage(preset.css);
   }
 
   async function deletePreset(id: string) {
@@ -488,14 +471,16 @@ export const usePolishStore = defineStore('polish', () => {
     }
   }
 
-  // ── Private Helpers ────────────────────────────────────────────────────────
+  async function toggleAutoApply() {
+    autoApply.value = !autoApply.value;
+    await saveSiteState();
+  }
+
+  // ── CSS builders ───────────────────────────────────────────────────────────
   function buildToggleCSS(t: PolishToggles): string {
     const rules: string[] = [];
 
     if (t.moreContrast) {
-      // body { color } alone doesn't cascade — sites set color directly on elements.
-      // Target all common text elements explicitly. Avoid touching backgrounds on
-      // div/section/article — that breaks colored cards and hero sections.
       rules.push(`
 /* ── More Contrast ── */
 html, body { background-color: #ffffff !important; }
@@ -513,10 +498,6 @@ input, textarea, select { color: #111111 !important; border-color: #888 !importa
     }
 
     if (t.extraSpacing) {
-      // Only touch line-height / letter-spacing on pure text elements.
-      // Avoid margins/padding/max-width — those shift layout.
-      // Avoid block containers (div, section) — they often have overflow:hidden
-      // with a fixed height and clipping expanded lines.
       rules.push(`
 /* ── Extra Spacing ── */
 p, li, dt, dd, td, th, label, blockquote,
@@ -532,7 +513,6 @@ p, li, td, th, label, blockquote {
     }
 
     if (t.darkMode) {
-      // Mutual exclusive with moreContrast — setToggle() enforces this.
       rules.push(`
 /* ── Dark Mode ── */
 html, body { background-color: #1a1a1a !important; }
@@ -558,7 +538,6 @@ img, video, canvas, picture { filter: none !important; }
 /* ── Focus Mode ── */
 
 /* === ADS & AD NETWORKS === */
-/* Google AdSense / DoubleClick */
 ins.adsbygoogle,
 [id^="google_ads"], [id^="google-ads"],
 [class^="google_ads"], [class^="google-ads"],
@@ -566,23 +545,19 @@ iframe[src*="googlesyndication"],
 iframe[src*="doubleclick.net"],
 iframe[src*="googleadservices"],
 iframe[src*="ad.doubleclick"],
-/* Generic ad slots */
 [id*="adslot"], [class*="adslot"],
 [id*="ad-slot"], [class*="ad-slot"],
 [id*="ad_slot"], [class*="ad_slot"],
 [id*="dfp-"], [class*="dfp-"],
 [id*="adunit"], [class*="adunit"],
 [id*="ad-unit"], [class*="ad-unit"],
-/* Outbrain / Taboola / RevContent */
 [id*="outbrain"], [class*="outbrain"],
 [id*="taboola"], [class*="taboola"],
 [id*="revcontent"], [class*="revcontent"],
 [id*="mgid"], [class*="mgid"],
 [id*="zergnet"], [class*="zergnet"],
-/* Amazon ads */
 iframe[src*="amazon-adsystem"],
 [class*="amzn-native"],
-/* Generic patterns — broad but effective */
 [id*="advert"], [class*="advert"],
 [class*="ad-wrap"], [id*="ad-wrap"],
 [class*="ad-container"], [id*="ad-container"],
@@ -598,8 +573,7 @@ iframe[src*="amazon-adsystem"],
 [class*="promo-"], [id*="promo-"],
 [class*="-promo"], [id*="-promo"] { display: none !important; }
 
-/* === ALL EXTERNAL IFRAMES (almost always ads or trackers) === */
-/* Whitelist: YouTube, Vimeo, Loom, Twitter/X embeds — hide everything else */
+/* === ALL EXTERNAL IFRAMES === */
 iframe:not([src*="youtube.com"]):not([src*="youtu.be"])
        :not([src*="vimeo.com"])
        :not([src*="loom.com"])
@@ -609,10 +583,8 @@ iframe:not([src*="youtube.com"]):not([src*="youtu.be"])
        :not([src*="player.twitch"]) { display: none !important; }
 
 /* === STICKY / FLOATING JUNK === */
-/* Fixed elements at bottom = cookie banners, chat bubbles, sticky ads */
 [style*="position: fixed"][style*="bottom"],
 [style*="position:fixed"][style*="bottom"] { display: none !important; }
-/* Named sticky bars */
 [class*="sticky-ad"], [class*="sticky-banner"],
 [class*="fixed-ad"], [class*="fixed-banner"],
 [class*="float-ad"], [class*="float-banner"],
@@ -640,7 +612,7 @@ iframe:not([src*="youtube.com"]):not([src*="youtu.be"])
 [class*="interstitial"],
 [class*="overlay-"] { display: none !important; }
 
-/* === NEWSLETTER & SUBSCRIBE NAGS === */
+/* === NEWSLETTER NAGS === */
 [class*="newsletter"], [id*="newsletter"],
 [class*="subscribe-"], [id*="subscribe-"],
 [class*="-subscribe"], [id*="-subscribe"],
@@ -680,7 +652,7 @@ aside,
 [class*="sharethis"], [class*="addtoany"],
 [class*="floating-share"], [class*="sticky-share"] { display: none !important; }
 
-/* === "YOU MAY ALSO LIKE" / CONTENT RECOMMENDATIONS === */
+/* === CONTENT RECOMMENDATIONS === */
 [class*="recommended"], [id*="recommended"],
 [class*="suggestions"], [id*="suggestions"],
 [class*="more-stories"], [id*="more-stories"],
@@ -690,7 +662,6 @@ aside,
     }
 
     if (t.readable) {
-      // Font loaded via <link> in background.ts — @import inside textContent is ignored.
       rules.push(`
 /* ── Readable ── */
 body, p, span, li, td, th, label, div,
@@ -713,9 +684,9 @@ code, pre, kbd { font-family: 'JetBrains Mono', 'Fira Code', monospace !importan
 
   function buildFineTuneCSS(ft: FineTuneState): string {
     const rules: string[] = [];
-    const BASE = 16; // browser default
+    const BASE_FONT_SIZE  = 16;
 
-    if (ft.bodyFontSize !== BASE) {
+    if (ft.bodyFontSize !== BASE_FONT_SIZE) {
       rules.push(`
 /* Fine-Tune: body size */
 body, p, span, li, td, th, label, blockquote, div {
@@ -772,6 +743,7 @@ input, textarea, select, button, blockquote {
     return rules.join('\n');
   }
 
+  // ── Private helpers ────────────────────────────────────────────────────────
   async function fetchAiCSS(prompt: string): Promise<string> {
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
@@ -795,9 +767,9 @@ input, textarea, select, button, blockquote {
       chrome.runtime.sendMessage(
         { type: 'APPLY_CSS', css, injectFontLink },
         (response: { ok: boolean; error?: string }) => {
-          if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
-          else if (!response?.ok) reject(new Error(response?.error ?? 'Unknown error'));
-          else resolve();
+          if (chrome.runtime.lastError)  reject(chrome.runtime.lastError);
+          else if (!response?.ok)        reject(new Error(response?.error ?? 'Unknown error'));
+          else                           resolve();
         },
       );
     });
@@ -808,14 +780,10 @@ input, textarea, select, button, blockquote {
     await chrome.storage.local.set({ [STORAGE_KEY]: raw });
   }
 
-  async function toggleAutoApply() {
-    autoApply.value = !autoApply.value;
-    await saveSiteState();
-  }
-
   return {
     selectedPreset,
     toggles,
+    fineTune,
     aiPrompt,
     autoApply,
     isPolishing,
@@ -826,11 +794,9 @@ input, textarea, select, button, blockquote {
     activePresetId,
     init,
     loadSiteState,
-    fineTune,
     resetFineTune,
     applyFineTune,
     resetAll,
-    resetToDefaults,
     applySystemPreset,
     setToggle,
     applyPolish,

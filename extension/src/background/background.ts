@@ -1,13 +1,15 @@
 // ── Polish Extension — Background Service Worker ───────────────────────────
 //
 // All privileged operations run here:
-//   • APPLY_CSS   — inject/remove <style> + optional <link> into the active tab
+//   • APPLY_CSS    — inject/remove <style> + optional <link> into the active tab
 //   • GENERATE_CSS — call Polish API proxy, return clean CSS to the side panel
 //
 // Why here and not in the side panel?
 //   Chrome MV3 side panels cannot use chrome.scripting or make cross-origin
 //   fetch calls without CORS issues. The service worker has both scripting
 //   permissions and unrestricted fetch access.
+
+import { POLISH_API_URL, STYLE_ELEMENT_ID, FONT_LINK_ID } from '../constants';
 
 // ── Panel behaviour ────────────────────────────────────────────────────────
 chrome.sidePanel
@@ -18,19 +20,17 @@ chrome.sidePanel
 // These functions run INSIDE the target tab's page context, not here.
 
 /** Inject or remove the Inter font <link> tag. */
-function manageFontLink(inject: boolean) {
-  const ID = 'polish-font-link';
+function manageFontLink(inject: boolean, fontLinkId: string) {
   if (inject) {
-    if (!document.getElementById(ID)) {
+    if (!document.getElementById(fontLinkId)) {
       const link = document.createElement('link');
-      link.id = ID;
-      link.rel = 'stylesheet';
-      link.href =
-        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
+      link.id   = fontLinkId;
+      link.rel  = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
       document.head.appendChild(link);
     }
   } else {
-    document.getElementById(ID)?.remove();
+    document.getElementById(fontLinkId)?.remove();
   }
 }
 
@@ -58,26 +58,23 @@ async function injectCSS(css: string, injectFontLink: boolean): Promise<void> {
 
   await chrome.scripting.executeScript({
     target: { tabId },
-    func: manageFontLink,
-    args: [injectFontLink],
+    func:   manageFontLink,
+    args:   [injectFontLink, FONT_LINK_ID],
   });
 
   await chrome.scripting.executeScript({
     target: { tabId },
-    func: applyStyleToPage,
-    args: [css, 'polish-injected'],
+    func:   applyStyleToPage,
+    args:   [css, STYLE_ELEMENT_ID],
   });
 }
 
 // ── Polish API proxy ───────────────────────────────────────────────────────
-// The Groq key lives on the server — never in the extension bundle.
-const POLISH_API_URL = 'https://polish-api-alpha.vercel.app/api/generate';
-
 async function generateCSSFromPrompt(prompt: string): Promise<string> {
   const response = await fetch(POLISH_API_URL, {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt }),
+    body:    JSON.stringify({ prompt }),
   });
 
   if (!response.ok) {
@@ -95,14 +92,14 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message.type === 'APPLY_CSS') {
     injectCSS(message.css ?? '', message.injectFontLink ?? false)
-      .then(() => sendResponse({ ok: true }))
+      .then(()    => sendResponse({ ok: true }))
       .catch((err) => sendResponse({ ok: false, error: String(err) }));
     return true;
   }
 
   if (message.type === 'GENERATE_CSS') {
     generateCSSFromPrompt(message.prompt)
-      .then((css) => sendResponse({ css }))
+      .then((css)  => sendResponse({ css }))
       .catch((err) => sendResponse({ error: String(err) }));
     return true;
   }

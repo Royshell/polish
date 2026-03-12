@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SectionCard from '../layout/SectionCard.vue';
-import RetroToggle from '../ui/RetroToggle.vue';
+import RetroToggle from '../common/RetroToggle.vue';
 import { usePolishStore } from '../../stores/polishStore';
 import type { PolishToggles } from '../../stores/polishStore';
 
@@ -16,10 +16,10 @@ const TOGGLE_LABELS: { key: keyof PolishToggles; label: string }[] = [
 </script>
 
 <template>
-  <SectionCard title="One-Click Polish" icon="⬛">
+  <SectionCard title="One-Click Polish">
 
     <div class="relative pb-1.5">
-      <span class="absolute -top-1.5 right-2.5 text-[16px] text-polish-yellow [text-shadow:0_0_8px_var(--color-polish-yellow)] pointer-events-none z-10 animate-[sparkle_1.5s_ease-in-out_infinite]">
+      <span class="absolute -top-1.5 right-2.5 text-base text-polish-yellow [text-shadow:0_0_8px_var(--color-polish-yellow)] pointer-events-none z-10 animate-[sparkle_1.5s_ease-in-out_infinite]">
         +✦
       </span>
 
@@ -28,7 +28,7 @@ const TOGGLE_LABELS: { key: keyof PolishToggles; label: string }[] = [
         :disabled="store.isPolishing"
         @click="store.applyPolish()"
       >
-        <span class="absolute top-0 -left-full w-[60%] h-full pointer-events-none [background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)] animate-[shine_3.75s_ease-in-out_infinite]" />
+        <span class="absolute top-0 -left-full w-3/5 h-full pointer-events-none [background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)] animate-[shine_3.75s_ease-in-out_infinite]" />
         <span v-if="store.isPolishing" class="inline-block mr-1 text-polish-green animate-[blink_0.5s_step-end_infinite]">█</span>
         {{ store.isPolishing ? 'Polishing...' : 'Polish it!' }}
       </button>
