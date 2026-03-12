@@ -21,10 +21,10 @@ async function handleGenerate() {
   }
 }
 
-function handleKeydown(e: KeyboardEvent) {
+function handleKeydown(event: KeyboardEvent) {
   // Enter alone = generate; Shift+Enter = newline
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
     handleGenerate();
   }
 }

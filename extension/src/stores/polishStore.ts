@@ -370,7 +370,7 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function applySystemPreset(id: string) {
-    const preset = SYSTEM_PRESETS.find((p) => p.id === id);
+    const preset = SYSTEM_PRESETS.find((preset) => preset.id === id);
     if (!preset) return;
     selectedPreset.value    = id;
     lastAppliedCSS.value    = preset.css.trim();
@@ -405,6 +405,7 @@ export const usePolishStore = defineStore('polish', () => {
       lastAppliedCSS.value    = css;
       lastAppliedSource.value = 'toggles';
       activePresetId.value    = null;
+      selectedPreset.value    = ''; // themes and toggles are separate modes
       await saveSiteState();
     } finally {
       isPolishing.value = false;
@@ -449,7 +450,7 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function applyPreset(id: string) {
-    const preset = presets.value.find((p) => p.id === id);
+    const preset = presets.value.find((preset) => preset.id === id);
     if (!preset) return;
     lastAppliedCSS.value    = preset.css;
     lastAppliedSource.value = preset.source;
@@ -458,13 +459,13 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function deletePreset(id: string) {
-    presets.value = presets.value.filter((p) => p.id !== id);
+    presets.value = presets.value.filter((preset) => preset.id !== id);
     if (activePresetId.value === id) activePresetId.value = null;
     await persistPresets();
   }
 
   async function renamePreset(id: string, newName: string) {
-    const preset = presets.value.find((p) => p.id === id);
+    const preset = presets.value.find((preset) => preset.id === id);
     if (preset) {
       preset.name = newName.trim();
       await persistPresets();

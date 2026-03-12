@@ -3,8 +3,8 @@ import { usePolishStore, SYSTEM_PRESETS } from '../../stores/polishStore';
 
 const store = usePolishStore();
 
-async function onSelect(e: Event) {
-  const id = (e.target as HTMLSelectElement).value;
+async function onSelect(event: Event) {
+  const id = (event.target as HTMLSelectElement).value;
   if (!id) return;
   await store.applySystemPreset(id);
 }

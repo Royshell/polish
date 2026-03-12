@@ -30,9 +30,9 @@ async function confirmSave() {
   saveName.value = '';
 }
 
-function handleSaveKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter')  confirmSave();
-  if (e.key === 'Escape') cancelSave();
+function handleSaveKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter')  confirmSave();
+  if (event.key === 'Escape') cancelSave();
 }
 
 // ── Rename flow ────────────────────────────────────────────────────────────
@@ -50,9 +50,9 @@ async function confirmRename(id: string) {
   renamingId.value = null;
 }
 
-function handleRenameKeydown(e: KeyboardEvent, id: string) {
-  if (e.key === 'Enter')  confirmRename(id);
-  if (e.key === 'Escape') renamingId.value = null;
+function handleRenameKeydown(event: KeyboardEvent, id: string) {
+  if (event.key === 'Enter')  confirmRename(id);
+  if (event.key === 'Escape') renamingId.value = null;
 }
 
 // ── Display ────────────────────────────────────────────────────────────────
