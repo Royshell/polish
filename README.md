@@ -2,7 +2,7 @@
 
 > Restyle any website — instantly, from your browser sidebar.
 
-![Polish in action](.docs/assets/demo.gif)
+![Polish in action](./docs/assets/demo.gif)
 
 ---
 
