@@ -89,21 +89,27 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
       <div
         v-for="preset in visiblePresets"
         :key="preset.id"
-        class="flex items-center gap-1.5 px-2 py-[5px] border transition-colors group"
+        class="flex items-center gap-1.5 px-2 py-[5px] border transition-colors group cursor-pointer"
         :class="
           store.activePresetId === preset.id
             ? 'border-polish-green bg-polish-green/5'
             : 'border-polish-border hover:border-polish-dim'
         "
+        @click="store.applyPreset(preset.id)"
       >
         <!-- Source icon -->
         <span
           class="text-[9px] shrink-0"
           :class="preset.source === 'ai' ? 'text-polish-magenta' : 'text-polish-cyan'"
-          :title="preset.source === 'ai' ? 'AI generated' : 'Toggles'"
         >
           {{ preset.source === "ai" ? "◈" : "⬛" }}
         </span>
+
+        <!-- Active indicator -->
+        <span
+          v-if="store.activePresetId === preset.id"
+          class="text-[9px] text-polish-green shrink-0"
+        >✓</span>
 
         <!-- Name / rename input -->
         <div class="flex-1 min-w-0">
@@ -114,52 +120,27 @@ const canSave = computed(() => !!store.lastAppliedCSS && !isSaving.value);
             autofocus
             @keydown="handleRenameKeydown($event, preset.id)"
             @blur="confirmRename(preset.id)"
+            @click.stop
           />
           <span
             v-else
-            class="font-mono text-[11px] truncate block cursor-pointer transition-colors"
-            :class="
-              store.activePresetId === preset.id
-                ? 'text-polish-green'
-                : 'text-polish-fg hover:text-polish-green'
-            "
+            class="font-mono text-[11px] truncate block transition-colors"
+            :class="store.activePresetId === preset.id ? 'text-polish-green' : 'text-polish-fg'"
             title="Double-click to rename"
-            @dblclick="startRename(preset.id, preset.name)"
+            @dblclick.stop="startRename(preset.id, preset.name)"
           >
             {{ preset.name }}
           </span>
         </div>
 
-        <!-- Actions — visible on hover, always visible when active -->
-        <div
-          class="flex gap-1 shrink-0 transition-opacity"
-          :class="
-            store.activePresetId === preset.id
-              ? 'opacity-100'
-              : 'opacity-0 group-hover:opacity-100'
-          "
+        <!-- Delete — only on hover -->
+        <button
+          class="font-pixel text-[7px] px-[5px] py-[3px] border border-transparent text-transparent group-hover:border-polish-dim group-hover:text-polish-dim hover:!border-polish-red hover:!text-polish-red transition-all cursor-pointer shrink-0"
+          title="Delete"
+          @click.stop="store.deletePreset(preset.id)"
         >
-          <button
-            class="font-pixel text-[7px] px-[6px] py-[3px] border transition-all cursor-pointer"
-            :class="
-              store.activePresetId === preset.id
-                ? 'border-polish-green text-polish-green bg-polish-green/10'
-                : 'border-polish-dim text-polish-dim hover:border-polish-green hover:text-polish-green'
-            "
-            :title="store.activePresetId === preset.id ? 'Active' : 'Apply'"
-            @click="store.applyPreset(preset.id)"
-          >
-            {{ store.activePresetId === preset.id ? "✓" : "▶" }}
-          </button>
-
-          <button
-            class="font-pixel text-[7px] px-[6px] py-[3px] border border-polish-dim text-polish-dim hover:border-polish-red hover:text-polish-red transition-all cursor-pointer"
-            title="Delete"
-            @click="store.deletePreset(preset.id)"
-          >
-            ✕
-          </button>
-        </div>
+          ✕
+        </button>
       </div>
 
       <!-- Show more / less -->

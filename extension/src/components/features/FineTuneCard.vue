@@ -6,11 +6,11 @@ const store = usePolishStore();
 const open = ref(false);
 
 const FONT_OPTIONS = [
-  { value: '',            label: '— Default —'   },
-  { value: 'inter',       label: 'Inter'          },
-  { value: 'georgia',     label: 'Georgia'        },
-  { value: 'merriweather',label: 'Merriweather'   },
-  { value: 'mono',        label: 'Monospace'      },
+  { value: '', label: '— Default —' },
+  { value: 'inter', label: 'Inter' },
+  { value: 'georgia', label: 'Georgia' },
+  { value: 'merriweather', label: 'Merriweather' },
+  { value: 'mono', label: 'Monospace' },
 ];
 
 // Debounce helper
@@ -34,39 +34,67 @@ function clearFineTune() {
 
 <template>
   <!-- Accordion wrapper -->
-  <div class="mx-2 my-2 border-2 border-polish-border transition-all"
-       :class="open ? '[box-shadow:0_0_20px_rgba(255,0,204,0.15)]' : ''">
-
+  <div class="mx-2 my-2 border-2 border-polish-border transition-all">
     <!-- Header — click to toggle -->
     <button
-      class="w-full flex items-center justify-between px-2.5 py-1.25 bg-linear-to-r from-polish-surface to-polish-panel font-pixel text-[8px] uppercase tracking-widest cursor-pointer hover:bg-polish-magenta/10 transition-colors"
-      :class="open ? 'text-polish-magenta [text-shadow:0_0_8px_var(--color-polish-magenta)] border-b border-polish-border' : 'text-polish-dim'"
+      class="w-full flex items-center justify-between px-2.5 bg-linear-to-r from-polish-surface to-polish-panel cursor-pointer transition-colors border-b"
+      style="height: 28px"
+      :class="open ? 'border-polish-border' : 'border-transparent'"
       @click="open = !open"
     >
-      <span class="flex items-center gap-1.5">
-        <span class="text-[10px]">◈</span>
-        Fine-Tune
+      <span class="flex items-center gap-2">
+        <!-- CSS dot — dim when closed, cyan when open -->
+        <span
+          class="shrink-0 rounded-full transition-all"
+          :class="open ? 'bg-polish-cyan' : 'bg-polish-dim'"
+          :style="
+            open
+              ? 'width:6px; height:6px; box-shadow:0 0 6px var(--color-polish-cyan);'
+              : 'width:6px; height:6px;'
+          "
+        />
+        <span
+          class="font-pixel text-[8px] uppercase tracking-widest transition-colors"
+          :class="
+            open
+              ? 'text-polish-cyan [text-shadow:0_0_8px_var(--color-polish-cyan)]'
+              : 'text-polish-dim'
+          "
+          >Fine-Tune</span
+        >
       </span>
-      <span class="text-[10px] transition-transform duration-200" :class="open ? 'rotate-180' : ''">▾</span>
+      <span
+        class="font-pixel text-[8px] transition-all duration-200"
+        :class="open ? 'text-polish-cyan' : 'text-polish-dim'"
+        :class2="open ? 'rotate-180' : ''"
+        :style2="open ? 'transform: rotate(180deg)' : ''"
+        >{{ open ? '▴' : '▾' }}</span
+      >
     </button>
 
     <!-- Body — collapsible -->
     <div v-if="open" class="p-2.5 flex flex-col gap-3">
-
       <!-- FONT SIZE -->
       <div class="flex flex-col gap-1.5">
         <div class="flex justify-between items-center">
           <span class="font-mono text-[11px] text-polish-fg">Body Size</span>
-          <span class="font-pixel text-[9px] text-polish-cyan [text-shadow:0_0_6px_var(--color-polish-cyan)]">
+          <span
+            class="font-pixel text-[9px] text-polish-cyan [text-shadow:0_0_6px_var(--color-polish-cyan)]"
+          >
             {{ store.fineTune.bodyFontSize }}px
           </span>
         </div>
         <div class="relative flex items-center gap-2">
           <span class="font-mono text-[9px] text-polish-dim shrink-0">12</span>
           <input
-            type="range" min="12" max="22" step="1"
+            type="range"
+            min="12"
+            max="22"
+            step="1"
             :value="store.fineTune.bodyFontSize"
-            @input="store.fineTune.bodyFontSize = +($event.target as HTMLInputElement).value"
+            @input="
+              store.fineTune.bodyFontSize = +($event.target as HTMLInputElement).value
+            "
             class="retro-slider flex-1"
           />
           <span class="font-mono text-[9px] text-polish-dim shrink-0">22</span>
@@ -77,16 +105,23 @@ function clearFineTune() {
       <div class="flex flex-col gap-1.5">
         <div class="flex justify-between items-center">
           <span class="font-mono text-[11px] text-polish-fg">Heading Scale</span>
-          <span class="font-pixel text-[9px] text-polish-cyan [text-shadow:0_0_6px_var(--color-polish-cyan)]">
+          <span
+            class="font-pixel text-[9px] text-polish-cyan [text-shadow:0_0_6px_var(--color-polish-cyan)]"
+          >
             {{ store.fineTune.headingScale.toFixed(1) }}×
           </span>
         </div>
         <div class="relative flex items-center gap-2">
           <span class="font-mono text-[9px] text-polish-dim shrink-0">0.8×</span>
           <input
-            type="range" min="0.8" max="2.0" step="0.1"
+            type="range"
+            min="0.8"
+            max="2.0"
+            step="0.1"
             :value="store.fineTune.headingScale"
-            @input="store.fineTune.headingScale = +($event.target as HTMLInputElement).value"
+            @input="
+              store.fineTune.headingScale = +($event.target as HTMLInputElement).value
+            "
             class="retro-slider flex-1"
           />
           <span class="font-mono text-[9px] text-polish-dim shrink-0">2.0×</span>
@@ -103,20 +138,37 @@ function clearFineTune() {
         <div class="flex gap-2">
           <!-- Background -->
           <label class="flex-1 flex flex-col gap-1 cursor-pointer group">
-            <span class="font-mono text-[9px] text-polish-dim group-hover:text-polish-fg transition-colors">Background</span>
-            <div class="relative border-2 transition-colors h-8 overflow-hidden"
-                 :class="store.fineTune.bgColor ? 'border-polish-magenta' : 'border-polish-border'">
+            <span
+              class="font-mono text-[9px] text-polish-dim group-hover:text-polish-fg transition-colors"
+              >Background</span
+            >
+            <div
+              class="relative border-2 transition-colors h-8 overflow-hidden"
+              :class="
+                store.fineTune.bgColor ? 'border-polish-magenta' : 'border-polish-border'
+              "
+            >
               <input
                 type="color"
                 :value="store.fineTune.bgColor || '#1a1a1a'"
-                @input="store.fineTune.bgColor = ($event.target as HTMLInputElement).value"
+                @input="
+                  store.fineTune.bgColor = ($event.target as HTMLInputElement).value
+                "
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
               <div class="w-full h-full flex items-center justify-center gap-1.5">
-                <div class="w-3 h-3 border border-polish-border"
-                     :style="store.fineTune.bgColor ? { background: store.fineTune.bgColor } : {}" />
-                <span class="font-mono text-[9px]"
-                      :class="store.fineTune.bgColor ? 'text-polish-magenta' : 'text-polish-dim'">
+                <div
+                  class="w-3 h-3 border border-polish-border"
+                  :style="
+                    store.fineTune.bgColor ? { background: store.fineTune.bgColor } : {}
+                  "
+                />
+                <span
+                  class="font-mono text-[9px]"
+                  :class="
+                    store.fineTune.bgColor ? 'text-polish-magenta' : 'text-polish-dim'
+                  "
+                >
                   {{ store.fineTune.bgColor || 'pick' }}
                 </span>
               </div>
@@ -125,20 +177,39 @@ function clearFineTune() {
 
           <!-- Text -->
           <label class="flex-1 flex flex-col gap-1 cursor-pointer group">
-            <span class="font-mono text-[9px] text-polish-dim group-hover:text-polish-fg transition-colors">Text</span>
-            <div class="relative border-2 transition-colors h-8 overflow-hidden"
-                 :class="store.fineTune.textColor ? 'border-polish-cyan' : 'border-polish-border'">
+            <span
+              class="font-mono text-[9px] text-polish-dim group-hover:text-polish-fg transition-colors"
+              >Text</span
+            >
+            <div
+              class="relative border-2 transition-colors h-8 overflow-hidden"
+              :class="
+                store.fineTune.textColor ? 'border-polish-cyan' : 'border-polish-border'
+              "
+            >
               <input
                 type="color"
                 :value="store.fineTune.textColor || '#e8e8e8'"
-                @input="store.fineTune.textColor = ($event.target as HTMLInputElement).value"
+                @input="
+                  store.fineTune.textColor = ($event.target as HTMLInputElement).value
+                "
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
               <div class="w-full h-full flex items-center justify-center gap-1.5">
-                <div class="w-3 h-3 border border-polish-border"
-                     :style="store.fineTune.textColor ? { background: store.fineTune.textColor } : {}" />
-                <span class="font-mono text-[9px]"
-                      :class="store.fineTune.textColor ? 'text-polish-cyan' : 'text-polish-dim'">
+                <div
+                  class="w-3 h-3 border border-polish-border"
+                  :style="
+                    store.fineTune.textColor
+                      ? { background: store.fineTune.textColor }
+                      : {}
+                  "
+                />
+                <span
+                  class="font-mono text-[9px]"
+                  :class="
+                    store.fineTune.textColor ? 'text-polish-cyan' : 'text-polish-dim'
+                  "
+                >
                   {{ store.fineTune.textColor || 'pick' }}
                 </span>
               </div>
@@ -158,9 +229,11 @@ function clearFineTune() {
             v-for="opt in FONT_OPTIONS"
             :key="opt.value"
             class="py-1 font-mono text-[8px] border-2 transition-all truncate px-0.5"
-            :class="store.fineTune.fontFamily === opt.value
-              ? 'border-polish-yellow text-polish-yellow bg-polish-yellow/10 [text-shadow:0_0_6px_var(--color-polish-yellow)]'
-              : 'border-polish-border text-polish-dim hover:border-polish-fg hover:text-polish-fg'"
+            :class="
+              store.fineTune.fontFamily === opt.value
+                ? 'border-polish-yellow text-polish-yellow bg-polish-yellow/10 [text-shadow:0_0_6px_var(--color-polish-yellow)]'
+                : 'border-polish-border text-polish-dim hover:border-polish-fg hover:text-polish-fg'
+            "
             @click="store.fineTune.fontFamily = opt.value"
           >
             {{ opt.label }}
@@ -175,7 +248,6 @@ function clearFineTune() {
       >
         ✕ Clear Fine-Tune
       </button>
-
     </div>
   </div>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   title: string;
-  icon?: string;
+  icon?: string; // kept for API compat but ignored — we use a CSS dot
 }>();
 </script>
 
@@ -11,10 +11,18 @@ defineProps<{
   >
     <!-- Title bar -->
     <div
-      class="flex items-center gap-1.5 px-2.5 py-1.25 border-b border-polish-border bg-linear-to-r from-polish-surface to-polish-panel font-pixel text-[8px] text-polish-cyan uppercase tracking-widest [text-shadow:0_0_8px_var(--color-polish-cyan)]"
+      class="flex items-center gap-2 px-2.5 border-b border-polish-border bg-linear-to-r from-polish-surface to-polish-panel"
+      style="height: 28px;"
     >
-      <span v-if="icon">{{ icon }}</span>
-      {{ title }}
+      <!-- CSS dot bullet — no font metric issues -->
+      <span
+        class="shrink-0 rounded-full bg-polish-cyan"
+        style="width: 6px; height: 6px; box-shadow: 0 0 6px var(--color-polish-cyan);"
+      />
+      <span
+        class="font-pixel text-[8px] text-polish-cyan uppercase tracking-widest [text-shadow:0_0_8px_var(--color-polish-cyan)]"
+        style="line-height: 1; position: relative; top: 1px;"
+      >{{ title }}</span>
     </div>
 
     <!-- Body -->

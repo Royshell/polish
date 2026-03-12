@@ -25,9 +25,8 @@ defineEmits<{
       </span>
     </div>
 
-    <!-- Nav buttons -->
+    <!-- Close button only -->
     <div class="flex gap-1.5">
-      <RetroButton variant="ghost" size="sm" @click="$emit('openList')">≡</RetroButton>
       <RetroButton variant="danger" size="sm" @click="$emit('close')">✕</RetroButton>
     </div>
   </header>
