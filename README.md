@@ -1,5 +1,93 @@
-# Vue 3 + TypeScript + Vite
+# Polish ✦
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+> Restyle any website — instantly, from your browser sidebar.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+![Polish in action](.docs/assets/demo.gif)
+
+---
+
+## What it does
+
+Polish is a Chrome side panel extension that lets you apply visual styles to any website you're browsing — without touching the site's code.
+
+- **One-Click Polish** — toggle contrast, dark mode, focus mode, readable fonts, and extra spacing
+- **Theme Presets** — curated full-page vibes (Miami Vice, Cyber Mode, Night Owl, and more)
+- **Fine-Tune** — adjust font size, heading scale, background and text color, and font family
+- **AI Style** — describe a look in plain text and get a custom CSS style generated instantly
+- **My Presets** — save any style you like and re-apply it on any site
+
+---
+
+## Architecture
+
+The extension communicates with a lightweight API proxy that handles AI style generation. The Groq API key is kept server-side — it never touches the extension bundle.
+
+**API endpoint:** `POST https://polish-api-alpha.vercel.app/api/generate`
+
+```json
+// Request
+{ "prompt": "dark mode with purple accents" }
+
+// Response
+{ "css": "/* generated CSS */" }
+```
+
+**API source:** [github.com/Royshell/polish-api](https://github.com/Royshell/polish-api)
+
+---
+
+## Install locally
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm (`npm install -g pnpm`)
+
+### Build
+
+```bash
+git clone https://github.com/Royshell/polish.git
+cd polish/extension
+pnpm install
+pnpm build
+```
+
+This generates a production-ready `dist/` folder.
+
+### Load in Chrome
+
+1. Open Chrome and go to `chrome://extensions`
+2. Enable **Developer mode** (top right toggle)
+3. Click **Load unpacked**
+4. Select the `extension/dist/` folder
+5. Click the extensions icon in the toolbar and pin **Polish**
+6. Navigate to any website and click the Polish icon to open the side panel
+
+### Development mode (with hot reload)
+
+```bash
+pnpm dev
+```
+
+Then load the `dist/` folder as above — Vite will rebuild on changes.
+
+---
+
+## Status
+
+This is an early release — the core experience works but expect rough edges. Planned improvements include:
+
+- Per-site style memory improvements
+- More system presets
+- Shareable preset links
+- Chrome Web Store release
+
+---
+
+## Tech stack
+
+- Vue 3 + TypeScript + Vite
+- Tailwind CSS v4
+- Pinia
+- Chrome Extension Manifest v3
+- Groq API (via [polish-api](https://github.com/Royshell/polish-api) proxy)
