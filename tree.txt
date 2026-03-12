@@ -1,0 +1,102 @@
+.
+├── README.md
+├── dist
+│   ├── assets
+│   │   └── sidebar-DazpRk_x.css
+│   ├── background
+│   │   └── background.js
+│   ├── content
+│   │   ├── contentScript.js
+│   │   └── injected
+│   │       └── sidebar.js
+│   ├── icons
+│   │   ├── icon-128.png
+│   │   ├── icon-16.png
+│   │   ├── icon-32.png
+│   │   └── icon-48.png
+│   └── vite.svg
+├── env.d.ts
+├── index.html
+├── manifest.json
+├── package.json
+├── pnpm-lock.yaml
+├── public
+│   ├── icons
+│   │   ├── icon-128.png
+│   │   ├── icon-16.png
+│   │   ├── icon-32.png
+│   │   └── icon-48.png
+│   └── vite.svg
+├── scripts
+│   └── generate-icons.mjs
+├── src
+│   ├── App.vue
+│   ├── assets
+│   │   └── vue.svg
+│   ├── background
+│   │   └── background.ts
+│   ├── components
+│   │   └── HelloWorld.vue
+│   ├── content
+│   │   └── contentScript.ts
+│   ├── main.ts
+│   └── style.css
+├── tree.txt
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+
+15 directories, 33 files
+.
+├── README.md
+├── dist
+│   ├── assets
+│   │   ├── index-B99Ba9To.js
+│   │   └── index-Bdf-HdcE.css
+│   ├── background
+│   │   └── background.js
+│   ├── content
+│   │   └── contentScript.js
+│   ├── icons
+│   │   ├── icon-128.png
+│   │   ├── icon-16.png
+│   │   ├── icon-32.png
+│   │   └── icon-48.png
+│   ├── index.html
+│   └── vite.svg
+├── env.d.ts
+├── globals.d.ts
+├── index.html
+├── manifest.json
+├── package.json
+├── pnpm-lock.yaml
+├── public
+│   ├── icons
+│   │   ├── icon-128.png
+│   │   ├── icon-16.png
+│   │   ├── icon-32.png
+│   │   └── icon-48.png
+│   └── vite.svg
+├── scripts
+│   └── generate-icons.mjs
+├── src
+│   ├── App.vue
+│   ├── assets
+│   │   └── vue.svg
+│   ├── background
+│   │   └── background.ts
+│   ├── components
+│   │   ├── HelloWorld.vue
+│   │   └── layout
+│   ├── content
+│   │   └── contentScript.ts
+│   ├── main.ts
+│   └── style.css
+├── tree.txt
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+
+15 directories, 35 files
