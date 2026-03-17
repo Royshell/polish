@@ -29,6 +29,7 @@ export interface FineTuneState {
 export interface SiteState {
   selectedPreset:    string;
   toggles:           PolishToggles;
+  fineTune:          FineTuneState;
   lastAppliedCSS:    string | null;
   lastAppliedSource: 'toggles' | 'ai' | null;
   activePresetId:    string | null;
@@ -335,13 +336,22 @@ export const usePolishStore = defineStore('polish', () => {
         lastAppliedCSS.value    = saved.lastAppliedCSS ?? null;
         lastAppliedSource.value = saved.lastAppliedSource ?? null;
         activePresetId.value    = saved.activePresetId ?? null;
-        Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
+        autoApply.value         = saved.autoApply ?? false;
+        Object.assign(toggles,  { ...DEFAULT_TOGGLES,  ...saved.toggles  });
+        Object.assign(fineTune, { ...DEFAULT_FINETUNE, ...saved.fineTune });
+
+        // Re-inject CSS if autoApply is on and we have a saved style
+        if (saved.autoApply && saved.lastAppliedCSS) {
+          sendCSSToPage(saved.lastAppliedCSS);
+        }
       } else {
         selectedPreset.value    = '';
         lastAppliedCSS.value    = null;
         lastAppliedSource.value = null;
         activePresetId.value    = null;
-        Object.assign(toggles, DEFAULT_TOGGLES);
+        autoApply.value         = false;
+        Object.assign(toggles,  DEFAULT_TOGGLES);
+        Object.assign(fineTune, DEFAULT_FINETUNE);
       }
     });
   }
@@ -352,6 +362,7 @@ export const usePolishStore = defineStore('polish', () => {
     const state: SiteState = {
       selectedPreset:    selectedPreset.value,
       toggles:           { ...toRaw(toggles) },
+      fineTune:          { ...toRaw(fineTune) },
       lastAppliedCSS:    lastAppliedCSS.value,
       lastAppliedSource: lastAppliedSource.value,
       activePresetId:    activePresetId.value,
@@ -392,6 +403,9 @@ export const usePolishStore = defineStore('polish', () => {
     const css      = buildFineTuneCSS(fineTune);
     const combined = [lastAppliedCSS.value ?? '', css].filter(Boolean).join('\n');
     await sendCSSToPage(combined, fineTune.fontFamily === 'inter');
+    // Persist the combined CSS so autoApply can re-inject it on next load
+    lastAppliedCSS.value = combined || null;
+    await saveSiteState();
   }
 
   function setToggle(key: keyof PolishToggles, value: boolean) {
