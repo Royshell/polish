@@ -29,7 +29,6 @@ export interface FineTuneState {
 export interface SiteState {
   selectedPreset:    string;
   toggles:           PolishToggles;
-  fineTune:          FineTuneState;
   lastAppliedCSS:    string | null;
   lastAppliedSource: 'toggles' | 'ai' | null;
   activePresetId:    string | null;
@@ -336,22 +335,13 @@ export const usePolishStore = defineStore('polish', () => {
         lastAppliedCSS.value    = saved.lastAppliedCSS ?? null;
         lastAppliedSource.value = saved.lastAppliedSource ?? null;
         activePresetId.value    = saved.activePresetId ?? null;
-        autoApply.value         = saved.autoApply ?? false;
-        Object.assign(toggles,  { ...DEFAULT_TOGGLES,  ...saved.toggles  });
-        Object.assign(fineTune, { ...DEFAULT_FINETUNE, ...saved.fineTune });
-
-        // Re-inject CSS if autoApply is on and we have a saved style
-        if (saved.autoApply && saved.lastAppliedCSS) {
-          sendCSSToPage(saved.lastAppliedCSS);
-        }
+        Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
       } else {
         selectedPreset.value    = '';
         lastAppliedCSS.value    = null;
         lastAppliedSource.value = null;
         activePresetId.value    = null;
-        autoApply.value         = false;
-        Object.assign(toggles,  DEFAULT_TOGGLES);
-        Object.assign(fineTune, DEFAULT_FINETUNE);
+        Object.assign(toggles, DEFAULT_TOGGLES);
       }
     });
   }
@@ -362,7 +352,6 @@ export const usePolishStore = defineStore('polish', () => {
     const state: SiteState = {
       selectedPreset:    selectedPreset.value,
       toggles:           { ...toRaw(toggles) },
-      fineTune:          { ...toRaw(fineTune) },
       lastAppliedCSS:    lastAppliedCSS.value,
       lastAppliedSource: lastAppliedSource.value,
       activePresetId:    activePresetId.value,
@@ -381,6 +370,7 @@ export const usePolishStore = defineStore('polish', () => {
     Object.assign(toggles,  DEFAULT_TOGGLES);
     Object.assign(fineTune, DEFAULT_FINETUNE);
     await sendCSSToPage('');
+    await saveSiteState(); // BUG FIX: persist the reset state so it survives panel reload
   }
 
   async function applySystemPreset(id: string) {
@@ -403,9 +393,6 @@ export const usePolishStore = defineStore('polish', () => {
     const css      = buildFineTuneCSS(fineTune);
     const combined = [lastAppliedCSS.value ?? '', css].filter(Boolean).join('\n');
     await sendCSSToPage(combined, fineTune.fontFamily === 'inter');
-    // Persist the combined CSS so autoApply can re-inject it on next load
-    lastAppliedCSS.value = combined || null;
-    await saveSiteState();
   }
 
   function setToggle(key: keyof PolishToggles, value: boolean) {
@@ -575,106 +562,91 @@ iframe[src*="ad.doubleclick"],
 [id*="zergnet"], [class*="zergnet"],
 iframe[src*="amazon-adsystem"],
 [class*="amzn-native"],
-[id*="advert"], [class*="advert"],
+[id*="advert"]:not([id*="content"]):not([id*="article"]),
+[class*="advert"]:not([class*="content"]):not([class*="article"]),
 [class*="ad-wrap"], [id*="ad-wrap"],
 [class*="ad-container"], [id*="ad-container"],
 [class*="ad_container"], [id*="ad_container"],
-[class*="adblock"], [id*="adblock"],
 [class*="ad-block"], [id*="ad-block"],
 [class*="adbox"], [id*="adbox"],
 [class*="ad-box"], [id*="ad-box"],
-[class*="sponsored"], [id*="sponsored"],
 [class*="sponsor-"], [id*="sponsor-"],
 [data-ad], [data-ad-unit], [data-ad-slot],
 [data-google-query-id],
-[class*="promo-"], [id*="promo-"],
-[class*="-promo"], [id*="-promo"] { display: none !important; }
+[class*="promo-banner"], [class*="promo-ad"],
+[id*="promo-banner"], [id*="promo-ad"] { display: none !important; }
 
-/* === ALL EXTERNAL IFRAMES === */
-iframe:not([src*="youtube.com"]):not([src*="youtu.be"])
-       :not([src*="vimeo.com"])
-       :not([src*="loom.com"])
-       :not([src*="twitter.com"]):not([src*="x.com"])
-       :not([src*="google.com/maps"])
-       :not([src*="maps.google"])
-       :not([src*="player.twitch"]) { display: none !important; }
+/* === EXTERNAL IFRAMES (ads/trackers) === */
+iframe[src*="googlesyndication"],
+iframe[src*="doubleclick"],
+iframe[src*="amazon-adsystem"],
+iframe[src*="outbrain"],
+iframe[src*="taboola"],
+iframe[src*="moatads"],
+iframe[src*="adnxs"] { display: none !important; }
 
 /* === STICKY / FLOATING JUNK === */
-[style*="position: fixed"][style*="bottom"],
-[style*="position:fixed"][style*="bottom"] { display: none !important; }
 [class*="sticky-ad"], [class*="sticky-banner"],
 [class*="fixed-ad"], [class*="fixed-banner"],
 [class*="float-ad"], [class*="float-banner"],
-[class*="bottom-bar"], [class*="bottom-strip"],
-[class*="top-bar"]:not(header):not(nav),
+[class*="bottom-ad"], [class*="bottom-strip"],
 [class*="ad-sticky"], [id*="ad-sticky"] { display: none !important; }
 
 /* === COOKIE & CONSENT BANNERS === */
-[id*="cookie"], [class*="cookie-banner"],
-[class*="cookie-bar"], [class*="cookie-notice"],
-[class*="cookie-consent"], [class*="cookie-modal"],
-[id*="gdpr"], [class*="gdpr"],
-[id*="consent-"], [class*="consent-"],
+[class*="cookie-banner"], [class*="cookie-bar"],
+[class*="cookie-notice"], [class*="cookie-consent"],
+[class*="cookie-modal"], [class*="cookie-popup"],
+[id*="gdpr-banner"], [id*="gdpr-popup"], [class*="gdpr-banner"],
 [id*="onetrust"], [class*="onetrust"],
 [id*="cookielaw"], [class*="cookielaw"],
-[id*="cookie-law"], [class*="cookie-law"],
 [class*="cc-window"], [class*="cc-banner"],
 [id*="CookieBanner"], [class*="CookieBanner"],
 [aria-label*="cookie" i], [aria-label*="consent" i] { display: none !important; }
 
-/* === POPUPS & MODALS === */
-[class*="modal"]:not([aria-modal="true"]):not([role="dialog"][open]),
-[class*="popup"]:not(details),
-[class*="lightbox"],
-[class*="interstitial"],
-[class*="overlay-"] { display: none !important; }
+/* === POPUPS & MODALS (non-functional) === */
+[class*="modal-overlay"], [class*="modal-backdrop"],
+[class*="popup-overlay"], [class*="popup-backdrop"],
+[class*="lightbox-overlay"],
+[class*="interstitial"] { display: none !important; }
 
 /* === NEWSLETTER NAGS === */
-[class*="newsletter"], [id*="newsletter"],
-[class*="subscribe-"], [id*="subscribe-"],
-[class*="-subscribe"], [id*="-subscribe"],
-[class*="email-signup"], [id*="email-signup"],
-[class*="signup-form"], [id*="signup-form"],
-[class*="email-capture"], [class*="lead-capture"],
-[class*="cta-bar"]:not(header):not(nav) { display: none !important; }
+[class*="newsletter-popup"], [class*="newsletter-modal"],
+[class*="newsletter-banner"], [class*="newsletter-bar"],
+[id*="newsletter-popup"], [id*="newsletter-modal"],
+[class*="email-signup-popup"], [class*="signup-modal"],
+[class*="email-capture"], [class*="lead-capture"] { display: none !important; }
 
 /* === CHAT & SUPPORT WIDGETS === */
 [id*="chat-widget"], [class*="chat-widget"],
 [id*="chat-button"], [class*="chat-button"],
-[id*="intercom"], [class*="intercom"],
-[id*="drift-widget"], [class*="drift"],
-[id*="zendesk"], [id*="zopim"],
+[id*="intercom"], [class*="intercom-container"],
+[id*="drift-widget"], [class*="drift-widget"],
+[id*="zendesk-widget"], [id*="zopim"],
 [id*="freshchat"], [class*="freshchat"],
-[id*="crisp-"], [class*="crisp-chat"],
-[id*="tawk"], [class*="tawk-"],
-[id*="helpscout"], [class*="beacon-"],
-[id*="hubspot-"], [class*="hubspot-messages"],
-[class*="livechat"], [id*="livechat"] { display: none !important; }
+[id*="crisp-chatbox"], [class*="crisp-chatbox"],
+[id*="tawk-widget"], [class*="tawk-min-container"],
+[id*="hubspot-messages-iframe-container"],
+[class*="livechat-widget"] { display: none !important; }
 
-/* === SIDEBARS === */
-aside,
-[id="sidebar"], [class="sidebar"],
-[id*="-sidebar"], [class*="-sidebar"],
-[id*="sidebar-"], [class*="sidebar-"],
-[id*="side-bar"], [class*="side-bar"],
-[role="complementary"],
-[class*="widget-area"], [id*="widget-area"],
-[class*="related-posts"], [id*="related-posts"],
-[class*="related-articles"], [id*="related-articles"] { display: none !important; }
-
-/* === SOCIAL SHARE FLOATERS === */
-[class*="social-share"], [id*="social-share"],
+/* === FLOATING / STICKY SOCIAL SHARE ONLY === */
+/* BUG FIX: was [class*="social-share"] which is too broad and hides
+   in-article share bars (e.g. CNN's social-share_labelled-list).
+   Now only targets explicitly floating/sticky/overlay variants. */
+[class*="social-share-float"], [class*="share-bar-float"],
+[class*="floating-share"], [class*="sticky-share"],
 [class*="share-bar"], [class*="share-widget"],
-[class*="sharing-bar"], [class*="addthis"],
-[class*="sharethis"], [class*="addtoany"],
-[class*="floating-share"], [class*="sticky-share"] { display: none !important; }
+[class*="sharing-bar"],
+[class*="addthis"], [class*="sharethis"], [class*="addtoany"] { display: none !important; }
 
-/* === CONTENT RECOMMENDATIONS === */
-[class*="recommended"], [id*="recommended"],
-[class*="suggestions"], [id*="suggestions"],
-[class*="more-stories"], [id*="more-stories"],
+/* === CONTENT RECOMMENDATIONS (off-article widgets only) === */
+/* BUG FIX: removed duplicate section and narrowed selectors.
+   [class*="suggestions"] was hiding unrelated UI (e.g. search dropdowns).
+   [class*="recommended"] was hiding too broadly. */
+[class*="recommended-widget"], [id*="recommended-widget"],
+[class*="you-may-like"], [class*="youmaylike"],
 [class*="around-the-web"], [class*="from-the-web"],
-[class*="you-may-like"], [class*="youmaylike"] { display: none !important; }
+[class*="more-stories-widget"], [id*="more-stories-widget"],
+[id*="taboola-below"], [id*="outbrain-below"] { display: none !important; }
       `);
     }
 
