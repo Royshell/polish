@@ -1,68 +1,68 @@
-import { ref, reactive, toRaw } from 'vue';
-import { defineStore } from 'pinia';
-import { STORAGE_KEY, SITE_KEY_PREFIX } from '../constants';
+import { ref, reactive, toRaw } from "vue";
+import { defineStore } from "pinia";
+import { STORAGE_KEY, SITE_KEY_PREFIX } from "../constants";
 
 export interface PolishToggles {
   moreContrast: boolean;
-  darkMode:     boolean;
-  focusMode:    boolean;
+  darkMode: boolean;
+  focusMode: boolean;
   extraSpacing: boolean;
-  readable:     boolean;
+  readable: boolean;
 }
 
 export interface UserPreset {
-  id:        string;
-  name:      string;
-  css:       string;
-  source:    'toggles' | 'ai';
+  id: string;
+  name: string;
+  css: string;
+  source: "toggles" | "ai";
   createdAt: number;
 }
 
 export interface FineTuneState {
-  bodyFontSize: number;  // 12–22px
-  headingScale: number;  // 0.8–2.0x
-  bgColor:      string;  // '' = not applied
-  textColor:    string;  // '' = not applied
-  fontFamily:   string;  // '' | 'inter' | 'georgia' | 'merriweather' | 'mono'
+  bodyFontSize: number; // 12–22px
+  headingScale: number; // 0.8–2.0x
+  bgColor: string; // '' = not applied
+  textColor: string; // '' = not applied
+  fontFamily: string; // '' | 'inter' | 'georgia' | 'merriweather' | 'mono'
 }
 
 export interface SiteState {
-  selectedPreset:    string;
-  toggles:           PolishToggles;
-  lastAppliedCSS:    string | null;
-  lastAppliedSource: 'toggles' | 'ai' | null;
-  activePresetId:    string | null;
-  autoApply:         boolean;
+  selectedPreset: string;
+  toggles: PolishToggles;
+  lastAppliedCSS: string | null;
+  lastAppliedSource: "toggles" | "ai" | null;
+  activePresetId: string | null;
+  autoApply: boolean;
 }
 
 export interface SystemPreset {
-  id:    string;
+  id: string;
   label: string;
-  css:   string;
+  css: string;
 }
 
 // ── Defaults ───────────────────────────────────────────────────────────────
 const DEFAULT_TOGGLES: PolishToggles = {
   moreContrast: false,
-  darkMode:     false,
-  focusMode:    false,
+  darkMode: false,
+  focusMode: false,
   extraSpacing: false,
-  readable:     false,
+  readable: false,
 };
 
 const DEFAULT_FINETUNE: FineTuneState = {
   bodyFontSize: 16,
   headingScale: 1.0,
-  bgColor:      '',
-  textColor:    '',
-  fontFamily:   '',
+  bgColor: "",
+  textColor: "",
+  fontFamily: "",
 };
 
 // ── System Presets ─────────────────────────────────────────────────────────
 export const SYSTEM_PRESETS: SystemPreset[] = [
   {
-    id: 'miami-vice',
-    label: '🌴 Miami Vice',
+    id: "miami-vice",
+    label: "🌴 Miami Vice",
     css: `
 /* Miami Vice — cinematic 80s night, based on the original title card */
 
@@ -122,8 +122,8 @@ code, pre {
 `,
   },
   {
-    id: 'cyber-mode',
-    label: '⚡ Cyber Mode',
+    id: "cyber-mode",
+    label: "⚡ Cyber Mode",
     css: `
 /* Cyber Mode — neon green on deep black */
 html, body,
@@ -159,8 +159,8 @@ code, pre { background: #061208 !important; color: #00e5ff !important; border-co
 `,
   },
   {
-    id: 'clean-reader',
-    label: '📖 Clean Reader',
+    id: "clean-reader",
+    label: "📖 Clean Reader",
     css: `
 /* Clean Reader — distraction-free reading */
 html, body,
@@ -195,8 +195,8 @@ p { max-width: 66ch !important; }
 `,
   },
   {
-    id: 'newspaper',
-    label: '🗞 Newspaper',
+    id: "newspaper",
+    label: "🗞 Newspaper",
     css: `
 /* Newspaper — classic editorial, dense serif */
 html, body,
@@ -237,8 +237,8 @@ blockquote {
 `,
   },
   {
-    id: 'night-owl',
-    label: '🦉 Night Owl',
+    id: "night-owl",
+    label: "🦉 Night Owl",
     css: `
 /* Night Owl — warm dark for late reading */
 html, body,
@@ -282,24 +282,28 @@ async function getCurrentHostname(): Promise<string | null> {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       const url = tabs[0]?.url;
       if (!url) return resolve(null);
-      try { resolve(new URL(url).hostname); } catch { resolve(null); }
+      try {
+        resolve(new URL(url).hostname);
+      } catch {
+        resolve(null);
+      }
     });
   });
 }
 
-export const usePolishStore = defineStore('polish', () => {
+export const usePolishStore = defineStore("polish", () => {
   // ── State ──────────────────────────────────────────────────────────────────
-  const selectedPreset   = ref('');
-  const toggles          = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
-  const fineTune         = reactive<FineTuneState>({ ...DEFAULT_FINETUNE });
-  const aiPrompt         = ref('');
-  const autoApply        = ref(false);
-  const isPolishing      = ref(false);
-  const isGenerating     = ref(false);
-  const lastAppliedCSS   = ref<string | null>(null);
-  const lastAppliedSource = ref<'toggles' | 'ai' | null>(null);
-  const presets          = ref<UserPreset[]>([]);
-  const activePresetId   = ref<string | null>(null);
+  const selectedPreset = ref("");
+  const toggles = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
+  const fineTune = reactive<FineTuneState>({ ...DEFAULT_FINETUNE });
+  const aiPrompt = ref("");
+  const autoApply = ref(false);
+  const isPolishing = ref(false);
+  const isGenerating = ref(false);
+  const lastAppliedCSS = ref<string | null>(null);
+  const lastAppliedSource = ref<"toggles" | "ai" | null>(null);
+  const presets = ref<UserPreset[]>([]);
+  const activePresetId = ref<string | null>(null);
 
   // ── Init ───────────────────────────────────────────────────────────────────
   // Called explicitly from main.ts after app mounts — chrome.storage isn't
@@ -318,29 +322,41 @@ export const usePolishStore = defineStore('polish', () => {
 
     chrome.tabs.onActivated.addListener(() => loadSiteState());
     chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
-      if (changeInfo.status === 'complete') loadSiteState();
+      if (changeInfo.status === "complete") {
+        loadSiteState();
+      }
     });
   }
 
   async function loadSiteState() {
     const hostname = await getCurrentHostname();
-    if (!hostname) return;
+    if (!hostname) {
+      return;
+    }
 
     const key = SITE_KEY_PREFIX + hostname;
-    chrome.storage.local.get(key, (result) => {
+    chrome.storage.local.get(key, async (result) => {
       const saved = result[key] as SiteState | undefined;
-      if (saved) {
-        // Only restore selected preset if CSS will actually be re-injected
-        selectedPreset.value    = (saved.autoApply && saved.lastAppliedCSS) ? (saved.selectedPreset ?? '') : '';
-        lastAppliedCSS.value    = saved.lastAppliedCSS ?? null;
+      if (!!saved) {
+        autoApply.value = saved.autoApply ?? false;
+        lastAppliedCSS.value = saved.lastAppliedCSS ?? null;
         lastAppliedSource.value = saved.lastAppliedSource ?? null;
-        activePresetId.value    = saved.activePresetId ?? null;
-        Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
+        activePresetId.value = saved.activePresetId ?? null;
+
+        if (!!saved.autoApply && !!saved.lastAppliedCSS) {
+          selectedPreset.value = saved.selectedPreset ?? "";
+          Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
+          await sendCSSToPage(saved.lastAppliedCSS);
+        } else {
+          selectedPreset.value = "";
+          Object.assign(toggles, DEFAULT_TOGGLES);
+        }
       } else {
-        selectedPreset.value    = '';
-        lastAppliedCSS.value    = null;
+        selectedPreset.value = "";
+        lastAppliedCSS.value = null;
         lastAppliedSource.value = null;
-        activePresetId.value    = null;
+        activePresetId.value = null;
+        autoApply.value = false;
         Object.assign(toggles, DEFAULT_TOGGLES);
       }
     });
@@ -348,37 +364,40 @@ export const usePolishStore = defineStore('polish', () => {
 
   async function saveSiteState() {
     const hostname = await getCurrentHostname();
-    if (!hostname) return;
+    if (!hostname) {
+      return;
+    }
     const state: SiteState = {
-      selectedPreset:    selectedPreset.value,
-      toggles:           { ...toRaw(toggles) },
-      lastAppliedCSS:    lastAppliedCSS.value,
+      selectedPreset: selectedPreset.value,
+      toggles: { ...toRaw(toggles) },
+      lastAppliedCSS: lastAppliedCSS.value,
       lastAppliedSource: lastAppliedSource.value,
-      activePresetId:    activePresetId.value,
-      autoApply:         autoApply.value,
+      activePresetId: activePresetId.value,
+      autoApply: autoApply.value,
     };
     chrome.storage.local.set({ [SITE_KEY_PREFIX + hostname]: state });
   }
 
   // ── Actions ────────────────────────────────────────────────────────────────
   async function resetAll() {
-    selectedPreset.value    = '';
-    lastAppliedCSS.value    = null;
+    selectedPreset.value = "";
+    lastAppliedCSS.value = null;
     lastAppliedSource.value = null;
-    activePresetId.value    = null;
-    aiPrompt.value          = '';
-    Object.assign(toggles,  DEFAULT_TOGGLES);
+    activePresetId.value = null;
+    aiPrompt.value = "";
+    Object.assign(toggles, DEFAULT_TOGGLES);
     Object.assign(fineTune, DEFAULT_FINETUNE);
-    await sendCSSToPage('');
+    await sendCSSToPage("");
+    await saveSiteState(); // BUG FIX: persist the reset state so it survives panel reload
   }
 
   async function applySystemPreset(id: string) {
-    const preset = SYSTEM_PRESETS.find((p) => p.id === id);
+    const preset = SYSTEM_PRESETS.find((preset) => preset.id === id);
     if (!preset) return;
-    selectedPreset.value    = id;
-    lastAppliedCSS.value    = preset.css.trim();
-    lastAppliedSource.value = 'toggles';
-    activePresetId.value    = null;
+    selectedPreset.value = id;
+    lastAppliedCSS.value = preset.css.trim();
+    lastAppliedSource.value = "toggles";
+    activePresetId.value = null;
     await sendCSSToPage(preset.css.trim());
     await saveSiteState();
   }
@@ -389,15 +408,25 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function applyFineTune() {
-    const css      = buildFineTuneCSS(fineTune);
-    const combined = [lastAppliedCSS.value ?? '', css].filter(Boolean).join('\n');
-    await sendCSSToPage(combined, fineTune.fontFamily === 'inter');
+    const css = buildFineTuneCSS(fineTune);
+    const combined = [lastAppliedCSS.value ?? "", css]
+      .filter(Boolean)
+      .join("\n");
+    await sendCSSToPage(combined, fineTune.fontFamily === "inter");
   }
 
-  function setToggle(key: keyof PolishToggles, value: boolean) {
-    if (key === 'moreContrast' && value) toggles.darkMode     = false;
-    if (key === 'darkMode'     && value) toggles.moreContrast = false;
+  async function setToggle(key: keyof PolishToggles, value: boolean) {
+    // Handle mutual exclusion
+    if (key === "moreContrast" && value) {
+      toggles.darkMode = false;
+    }
+    if (key === "darkMode" && value) {
+      toggles.moreContrast = false;
+    }
+
+    // Always set the value and save
     toggles[key] = value;
+    saveSiteState();
   }
 
   async function applyPolish() {
@@ -405,9 +434,9 @@ export const usePolishStore = defineStore('polish', () => {
     try {
       const css = buildToggleCSS(toggles);
       await sendCSSToPage(css);
-      lastAppliedCSS.value    = css;
-      lastAppliedSource.value = 'toggles';
-      activePresetId.value    = null;
+      lastAppliedCSS.value = css;
+      lastAppliedSource.value = "toggles";
+      activePresetId.value = null;
       await saveSiteState();
     } finally {
       isPolishing.value = false;
@@ -419,9 +448,9 @@ export const usePolishStore = defineStore('polish', () => {
     try {
       const css = await fetchAiCSS(prompt);
       await sendCSSToPage(css);
-      lastAppliedCSS.value    = css;
-      lastAppliedSource.value = 'ai';
-      activePresetId.value    = null;
+      lastAppliedCSS.value = css;
+      lastAppliedSource.value = "ai";
+      activePresetId.value = null;
       await saveSiteState();
     } finally {
       isGenerating.value = false;
@@ -429,10 +458,10 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function revertStyles() {
-    lastAppliedCSS.value    = null;
+    lastAppliedCSS.value = null;
     lastAppliedSource.value = null;
-    activePresetId.value    = null;
-    await sendCSSToPage('');
+    activePresetId.value = null;
+    await sendCSSToPage("");
     await saveSiteState();
   }
 
@@ -440,10 +469,10 @@ export const usePolishStore = defineStore('polish', () => {
   async function savePreset(name: string) {
     if (!lastAppliedCSS.value) return;
     const preset: UserPreset = {
-      id:        `preset_${Date.now()}`,
-      name:      name.trim(),
-      css:       lastAppliedCSS.value,
-      source:    lastAppliedSource.value ?? 'toggles',
+      id: `preset_${Date.now()}`,
+      name: name.trim(),
+      css: lastAppliedCSS.value,
+      source: lastAppliedSource.value ?? "toggles",
       createdAt: Date.now(),
     };
     presets.value.push(preset);
@@ -452,22 +481,22 @@ export const usePolishStore = defineStore('polish', () => {
   }
 
   async function applyPreset(id: string) {
-    const preset = presets.value.find((p) => p.id === id);
+    const preset = presets.value.find((preset) => preset.id === id);
     if (!preset) return;
-    lastAppliedCSS.value    = preset.css;
+    lastAppliedCSS.value = preset.css;
     lastAppliedSource.value = preset.source;
-    activePresetId.value    = id;
+    activePresetId.value = id;
     await sendCSSToPage(preset.css);
   }
 
   async function deletePreset(id: string) {
-    presets.value = presets.value.filter((p) => p.id !== id);
+    presets.value = presets.value.filter((preset) => preset.id !== id);
     if (activePresetId.value === id) activePresetId.value = null;
     await persistPresets();
   }
 
   async function renamePreset(id: string, newName: string) {
-    const preset = presets.value.find((p) => p.id === id);
+    const preset = presets.value.find((preset) => preset.id === id);
     if (preset) {
       preset.name = newName.trim();
       await persistPresets();
@@ -561,106 +590,91 @@ iframe[src*="ad.doubleclick"],
 [id*="zergnet"], [class*="zergnet"],
 iframe[src*="amazon-adsystem"],
 [class*="amzn-native"],
-[id*="advert"], [class*="advert"],
+[id*="advert"]:not([id*="content"]):not([id*="article"]),
+[class*="advert"]:not([class*="content"]):not([class*="article"]),
 [class*="ad-wrap"], [id*="ad-wrap"],
 [class*="ad-container"], [id*="ad-container"],
 [class*="ad_container"], [id*="ad_container"],
-[class*="adblock"], [id*="adblock"],
 [class*="ad-block"], [id*="ad-block"],
 [class*="adbox"], [id*="adbox"],
 [class*="ad-box"], [id*="ad-box"],
-[class*="sponsored"], [id*="sponsored"],
 [class*="sponsor-"], [id*="sponsor-"],
 [data-ad], [data-ad-unit], [data-ad-slot],
 [data-google-query-id],
-[class*="promo-"], [id*="promo-"],
-[class*="-promo"], [id*="-promo"] { display: none !important; }
+[class*="promo-banner"], [class*="promo-ad"],
+[id*="promo-banner"], [id*="promo-ad"] { display: none !important; }
 
-/* === ALL EXTERNAL IFRAMES === */
-iframe:not([src*="youtube.com"]):not([src*="youtu.be"])
-       :not([src*="vimeo.com"])
-       :not([src*="loom.com"])
-       :not([src*="twitter.com"]):not([src*="x.com"])
-       :not([src*="google.com/maps"])
-       :not([src*="maps.google"])
-       :not([src*="player.twitch"]) { display: none !important; }
+/* === EXTERNAL IFRAMES (ads/trackers) === */
+iframe[src*="googlesyndication"],
+iframe[src*="doubleclick"],
+iframe[src*="amazon-adsystem"],
+iframe[src*="outbrain"],
+iframe[src*="taboola"],
+iframe[src*="moatads"],
+iframe[src*="adnxs"] { display: none !important; }
 
 /* === STICKY / FLOATING JUNK === */
-[style*="position: fixed"][style*="bottom"],
-[style*="position:fixed"][style*="bottom"] { display: none !important; }
 [class*="sticky-ad"], [class*="sticky-banner"],
 [class*="fixed-ad"], [class*="fixed-banner"],
 [class*="float-ad"], [class*="float-banner"],
-[class*="bottom-bar"], [class*="bottom-strip"],
-[class*="top-bar"]:not(header):not(nav),
+[class*="bottom-ad"], [class*="bottom-strip"],
 [class*="ad-sticky"], [id*="ad-sticky"] { display: none !important; }
 
 /* === COOKIE & CONSENT BANNERS === */
-[id*="cookie"], [class*="cookie-banner"],
-[class*="cookie-bar"], [class*="cookie-notice"],
-[class*="cookie-consent"], [class*="cookie-modal"],
-[id*="gdpr"], [class*="gdpr"],
-[id*="consent-"], [class*="consent-"],
+[class*="cookie-banner"], [class*="cookie-bar"],
+[class*="cookie-notice"], [class*="cookie-consent"],
+[class*="cookie-modal"], [class*="cookie-popup"],
+[id*="gdpr-banner"], [id*="gdpr-popup"], [class*="gdpr-banner"],
 [id*="onetrust"], [class*="onetrust"],
 [id*="cookielaw"], [class*="cookielaw"],
-[id*="cookie-law"], [class*="cookie-law"],
 [class*="cc-window"], [class*="cc-banner"],
 [id*="CookieBanner"], [class*="CookieBanner"],
 [aria-label*="cookie" i], [aria-label*="consent" i] { display: none !important; }
 
-/* === POPUPS & MODALS === */
-[class*="modal"]:not([aria-modal="true"]):not([role="dialog"][open]),
-[class*="popup"]:not(details),
-[class*="lightbox"],
-[class*="interstitial"],
-[class*="overlay-"] { display: none !important; }
+/* === POPUPS & MODALS (non-functional) === */
+[class*="modal-overlay"], [class*="modal-backdrop"],
+[class*="popup-overlay"], [class*="popup-backdrop"],
+[class*="lightbox-overlay"],
+[class*="interstitial"] { display: none !important; }
 
 /* === NEWSLETTER NAGS === */
-[class*="newsletter"], [id*="newsletter"],
-[class*="subscribe-"], [id*="subscribe-"],
-[class*="-subscribe"], [id*="-subscribe"],
-[class*="email-signup"], [id*="email-signup"],
-[class*="signup-form"], [id*="signup-form"],
-[class*="email-capture"], [class*="lead-capture"],
-[class*="cta-bar"]:not(header):not(nav) { display: none !important; }
+[class*="newsletter-popup"], [class*="newsletter-modal"],
+[class*="newsletter-banner"], [class*="newsletter-bar"],
+[id*="newsletter-popup"], [id*="newsletter-modal"],
+[class*="email-signup-popup"], [class*="signup-modal"],
+[class*="email-capture"], [class*="lead-capture"] { display: none !important; }
 
 /* === CHAT & SUPPORT WIDGETS === */
 [id*="chat-widget"], [class*="chat-widget"],
 [id*="chat-button"], [class*="chat-button"],
-[id*="intercom"], [class*="intercom"],
-[id*="drift-widget"], [class*="drift"],
-[id*="zendesk"], [id*="zopim"],
+[id*="intercom"], [class*="intercom-container"],
+[id*="drift-widget"], [class*="drift-widget"],
+[id*="zendesk-widget"], [id*="zopim"],
 [id*="freshchat"], [class*="freshchat"],
-[id*="crisp-"], [class*="crisp-chat"],
-[id*="tawk"], [class*="tawk-"],
-[id*="helpscout"], [class*="beacon-"],
-[id*="hubspot-"], [class*="hubspot-messages"],
-[class*="livechat"], [id*="livechat"] { display: none !important; }
+[id*="crisp-chatbox"], [class*="crisp-chatbox"],
+[id*="tawk-widget"], [class*="tawk-min-container"],
+[id*="hubspot-messages-iframe-container"],
+[class*="livechat-widget"] { display: none !important; }
 
-/* === SIDEBARS === */
-aside,
-[id="sidebar"], [class="sidebar"],
-[id*="-sidebar"], [class*="-sidebar"],
-[id*="sidebar-"], [class*="sidebar-"],
-[id*="side-bar"], [class*="side-bar"],
-[role="complementary"],
-[class*="widget-area"], [id*="widget-area"],
-[class*="related-posts"], [id*="related-posts"],
-[class*="related-articles"], [id*="related-articles"] { display: none !important; }
-
-/* === SOCIAL SHARE FLOATERS === */
-[class*="social-share"], [id*="social-share"],
+/* === FLOATING / STICKY SOCIAL SHARE ONLY === */
+/* BUG FIX: was [class*="social-share"] which is too broad and hides
+   in-article share bars (e.g. CNN's social-share_labelled-list).
+   Now only targets explicitly floating/sticky/overlay variants. */
+[class*="social-share-float"], [class*="share-bar-float"],
+[class*="floating-share"], [class*="sticky-share"],
 [class*="share-bar"], [class*="share-widget"],
-[class*="sharing-bar"], [class*="addthis"],
-[class*="sharethis"], [class*="addtoany"],
-[class*="floating-share"], [class*="sticky-share"] { display: none !important; }
+[class*="sharing-bar"],
+[class*="addthis"], [class*="sharethis"], [class*="addtoany"] { display: none !important; }
 
-/* === CONTENT RECOMMENDATIONS === */
-[class*="recommended"], [id*="recommended"],
-[class*="suggestions"], [id*="suggestions"],
-[class*="more-stories"], [id*="more-stories"],
+/* === CONTENT RECOMMENDATIONS (off-article widgets only) === */
+/* BUG FIX: removed duplicate section and narrowed selectors.
+   [class*="suggestions"] was hiding unrelated UI (e.g. search dropdowns).
+   [class*="recommended"] was hiding too broadly. */
+[class*="recommended-widget"], [id*="recommended-widget"],
+[class*="you-may-like"], [class*="youmaylike"],
 [class*="around-the-web"], [class*="from-the-web"],
-[class*="you-may-like"], [class*="youmaylike"] { display: none !important; }
+[class*="more-stories-widget"], [id*="more-stories-widget"],
+[id*="taboola-below"], [id*="outbrain-below"] { display: none !important; }
       `);
     }
 
@@ -682,12 +696,12 @@ code, pre, kbd { font-family: 'JetBrains Mono', 'Fira Code', monospace !importan
       `);
     }
 
-    return rules.join('\n');
+    return rules.join("\n");
   }
 
   function buildFineTuneCSS(ft: FineTuneState): string {
     const rules: string[] = [];
-    const BASE_FONT_SIZE  = 16;
+    const BASE_FONT_SIZE = 16;
 
     if (ft.bodyFontSize !== BASE_FONT_SIZE) {
       rules.push(`
@@ -701,11 +715,11 @@ body, p, span, li, td, th, label, blockquote, div {
       const s = ft.headingScale;
       rules.push(`
 /* Fine-Tune: heading scale */
-h1 { font-size: ${(2.0   * s).toFixed(2)}rem !important; }
-h2 { font-size: ${(1.5   * s).toFixed(2)}rem !important; }
-h3 { font-size: ${(1.25  * s).toFixed(2)}rem !important; }
-h4 { font-size: ${(1.1   * s).toFixed(2)}rem !important; }
-h5 { font-size: ${(1.0   * s).toFixed(2)}rem !important; }
+h1 { font-size: ${(2.0 * s).toFixed(2)}rem !important; }
+h2 { font-size: ${(1.5 * s).toFixed(2)}rem !important; }
+h3 { font-size: ${(1.25 * s).toFixed(2)}rem !important; }
+h4 { font-size: ${(1.1 * s).toFixed(2)}rem !important; }
+h5 { font-size: ${(1.0 * s).toFixed(2)}rem !important; }
 h6 { font-size: ${(0.875 * s).toFixed(2)}rem !important; }`);
     }
 
@@ -727,10 +741,10 @@ h1, h2, h3, h4, h5, h6 { color: ${ft.textColor} !important; }`);
 
     if (ft.fontFamily) {
       const fontMap: Record<string, string> = {
-        inter:        "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-        georgia:      "Georgia, 'Times New Roman', serif",
+        inter: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        georgia: "Georgia, 'Times New Roman', serif",
         merriweather: "'Merriweather', Georgia, serif",
-        mono:         "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
+        mono: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
       };
       const stack = fontMap[ft.fontFamily];
       if (stack) {
@@ -743,21 +757,21 @@ input, textarea, select, button, blockquote {
       }
     }
 
-    return rules.join('\n');
+    return rules.join("\n");
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
   async function fetchAiCSS(prompt: string): Promise<string> {
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
-        { type: 'GENERATE_CSS', prompt },
+        { type: "GENERATE_CSS", prompt },
         (response: { css?: string; error?: string }) => {
           if (chrome.runtime.lastError) {
             reject(chrome.runtime.lastError);
           } else if (response?.error) {
             reject(new Error(response.error));
           } else {
-            resolve(response?.css ?? '');
+            resolve(response?.css ?? "");
           }
         },
       );
@@ -768,11 +782,12 @@ input, textarea, select, button, blockquote {
     const injectFontLink = (toggles.readable || forceFont) && !!css;
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
-        { type: 'APPLY_CSS', css, injectFontLink },
+        { type: "APPLY_CSS", css, injectFontLink },
         (response: { ok: boolean; error?: string }) => {
-          if (chrome.runtime.lastError)  reject(chrome.runtime.lastError);
-          else if (!response?.ok)        reject(new Error(response?.error ?? 'Unknown error'));
-          else                           resolve();
+          if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
+          else if (!response?.ok)
+            reject(new Error(response?.error ?? "Unknown error"));
+          else resolve();
         },
       );
     });
