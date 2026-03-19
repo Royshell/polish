@@ -1,6 +1,6 @@
-import { ref, reactive, toRaw } from "vue";
-import { defineStore } from "pinia";
-import { STORAGE_KEY, SITE_KEY_PREFIX } from "../constants";
+import { ref, reactive, toRaw } from 'vue';
+import { defineStore } from 'pinia';
+import { STORAGE_KEY, SITE_KEY_PREFIX } from '../constants';
 
 export interface PolishToggles {
   moreContrast: boolean;
@@ -14,7 +14,7 @@ export interface UserPreset {
   id: string;
   name: string;
   css: string;
-  source: "toggles" | "ai";
+  source: 'toggles' | 'ai';
   createdAt: number;
 }
 
@@ -30,7 +30,7 @@ export interface SiteState {
   selectedPreset: string;
   toggles: PolishToggles;
   lastAppliedCSS: string | null;
-  lastAppliedSource: "toggles" | "ai" | null;
+  lastAppliedSource: 'toggles' | 'ai' | null;
   activePresetId: string | null;
   autoApply: boolean;
 }
@@ -53,16 +53,16 @@ const DEFAULT_TOGGLES: PolishToggles = {
 const DEFAULT_FINETUNE: FineTuneState = {
   bodyFontSize: 16,
   headingScale: 1.0,
-  bgColor: "",
-  textColor: "",
-  fontFamily: "",
+  bgColor: '',
+  textColor: '',
+  fontFamily: '',
 };
 
 // ── System Presets ─────────────────────────────────────────────────────────
 export const SYSTEM_PRESETS: SystemPreset[] = [
   {
-    id: "miami-vice",
-    label: "🌴 Miami Vice",
+    id: 'miami-vice',
+    label: '🌴 Miami Vice',
     css: `
 /* Miami Vice — cinematic 80s night, based on the original title card */
 
@@ -122,8 +122,8 @@ code, pre {
 `,
   },
   {
-    id: "cyber-mode",
-    label: "⚡ Cyber Mode",
+    id: 'cyber-mode',
+    label: '⚡ Cyber Mode',
     css: `
 /* Cyber Mode — neon green on deep black */
 html, body,
@@ -159,8 +159,8 @@ code, pre { background: #061208 !important; color: #00e5ff !important; border-co
 `,
   },
   {
-    id: "clean-reader",
-    label: "📖 Clean Reader",
+    id: 'clean-reader',
+    label: '📖 Clean Reader',
     css: `
 /* Clean Reader — distraction-free reading */
 html, body,
@@ -195,8 +195,8 @@ p { max-width: 66ch !important; }
 `,
   },
   {
-    id: "newspaper",
-    label: "🗞 Newspaper",
+    id: 'newspaper',
+    label: '🗞 Newspaper',
     css: `
 /* Newspaper — classic editorial, dense serif */
 html, body,
@@ -237,8 +237,8 @@ blockquote {
 `,
   },
   {
-    id: "night-owl",
-    label: "🦉 Night Owl",
+    id: 'night-owl',
+    label: '🦉 Night Owl',
     css: `
 /* Night Owl — warm dark for late reading */
 html, body,
@@ -281,7 +281,9 @@ async function getCurrentHostname(): Promise<string | null> {
   return new Promise((resolve) => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       const url = tabs[0]?.url;
-      if (!url) return resolve(null);
+      if (!url) {
+        return resolve(null);
+      }
       try {
         resolve(new URL(url).hostname);
       } catch {
@@ -291,17 +293,17 @@ async function getCurrentHostname(): Promise<string | null> {
   });
 }
 
-export const usePolishStore = defineStore("polish", () => {
+export const usePolishStore = defineStore('polish', () => {
   // ── State ──────────────────────────────────────────────────────────────────
-  const selectedPreset = ref("");
+  const selectedPreset = ref('');
   const toggles = reactive<PolishToggles>({ ...DEFAULT_TOGGLES });
   const fineTune = reactive<FineTuneState>({ ...DEFAULT_FINETUNE });
-  const aiPrompt = ref("");
+  const aiPrompt = ref('');
   const autoApply = ref(false);
   const isPolishing = ref(false);
   const isGenerating = ref(false);
   const lastAppliedCSS = ref<string | null>(null);
-  const lastAppliedSource = ref<"toggles" | "ai" | null>(null);
+  const lastAppliedSource = ref<'toggles' | 'ai' | null>(null);
   const presets = ref<UserPreset[]>([]);
   const activePresetId = ref<string | null>(null);
 
@@ -322,7 +324,7 @@ export const usePolishStore = defineStore("polish", () => {
 
     chrome.tabs.onActivated.addListener(() => loadSiteState());
     chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
-      if (changeInfo.status === "complete") {
+      if (changeInfo.status === 'complete') {
         loadSiteState();
       }
     });
@@ -344,15 +346,15 @@ export const usePolishStore = defineStore("polish", () => {
         activePresetId.value = saved.activePresetId ?? null;
 
         if (!!saved.autoApply && !!saved.lastAppliedCSS) {
-          selectedPreset.value = saved.selectedPreset ?? "";
+          selectedPreset.value = saved.selectedPreset ?? '';
           Object.assign(toggles, { ...DEFAULT_TOGGLES, ...saved.toggles });
           await sendCSSToPage(saved.lastAppliedCSS);
         } else {
-          selectedPreset.value = "";
+          selectedPreset.value = '';
           Object.assign(toggles, DEFAULT_TOGGLES);
         }
       } else {
-        selectedPreset.value = "";
+        selectedPreset.value = '';
         lastAppliedCSS.value = null;
         lastAppliedSource.value = null;
         activePresetId.value = null;
@@ -380,23 +382,25 @@ export const usePolishStore = defineStore("polish", () => {
 
   // ── Actions ────────────────────────────────────────────────────────────────
   async function resetAll() {
-    selectedPreset.value = "";
+    selectedPreset.value = '';
     lastAppliedCSS.value = null;
     lastAppliedSource.value = null;
     activePresetId.value = null;
-    aiPrompt.value = "";
+    aiPrompt.value = '';
     Object.assign(toggles, DEFAULT_TOGGLES);
     Object.assign(fineTune, DEFAULT_FINETUNE);
-    await sendCSSToPage("");
+    await sendCSSToPage('');
     await saveSiteState(); // BUG FIX: persist the reset state so it survives panel reload
   }
 
   async function applySystemPreset(id: string) {
-    const preset = SYSTEM_PRESETS.find((preset) => preset.id === id);
-    if (!preset) return;
+    const preset = SYSTEM_PRESETS.find((systemPreset) => systemPreset.id === id);
+    if (!preset) {
+      return;
+    }
     selectedPreset.value = id;
     lastAppliedCSS.value = preset.css.trim();
-    lastAppliedSource.value = "toggles";
+    lastAppliedSource.value = 'toggles';
     activePresetId.value = null;
     await sendCSSToPage(preset.css.trim());
     await saveSiteState();
@@ -409,18 +413,16 @@ export const usePolishStore = defineStore("polish", () => {
 
   async function applyFineTune() {
     const css = buildFineTuneCSS(fineTune);
-    const combined = [lastAppliedCSS.value ?? "", css]
-      .filter(Boolean)
-      .join("\n");
-    await sendCSSToPage(combined, fineTune.fontFamily === "inter");
+    const combined = [lastAppliedCSS.value ?? '', css].filter(Boolean).join('\n');
+    await sendCSSToPage(combined, fineTune.fontFamily === 'inter');
   }
 
   async function setToggle(key: keyof PolishToggles, value: boolean) {
     // Handle mutual exclusion
-    if (key === "moreContrast" && value) {
+    if (key === 'moreContrast' && value) {
       toggles.darkMode = false;
     }
-    if (key === "darkMode" && value) {
+    if (key === 'darkMode' && value) {
       toggles.moreContrast = false;
     }
 
@@ -435,8 +437,9 @@ export const usePolishStore = defineStore("polish", () => {
       const css = buildToggleCSS(toggles);
       await sendCSSToPage(css);
       lastAppliedCSS.value = css;
-      lastAppliedSource.value = "toggles";
+      lastAppliedSource.value = 'toggles';
       activePresetId.value = null;
+      selectedPreset.value = '';
       await saveSiteState();
     } finally {
       isPolishing.value = false;
@@ -449,8 +452,9 @@ export const usePolishStore = defineStore("polish", () => {
       const css = await fetchAiCSS(prompt);
       await sendCSSToPage(css);
       lastAppliedCSS.value = css;
-      lastAppliedSource.value = "ai";
+      lastAppliedSource.value = 'ai';
       activePresetId.value = null;
+      selectedPreset.value = '';
       await saveSiteState();
     } finally {
       isGenerating.value = false;
@@ -461,18 +465,20 @@ export const usePolishStore = defineStore("polish", () => {
     lastAppliedCSS.value = null;
     lastAppliedSource.value = null;
     activePresetId.value = null;
-    await sendCSSToPage("");
+    await sendCSSToPage('');
     await saveSiteState();
   }
 
   // ── Preset actions ─────────────────────────────────────────────────────────
   async function savePreset(name: string) {
-    if (!lastAppliedCSS.value) return;
+    if (!lastAppliedCSS.value) {
+      return;
+    }
     const preset: UserPreset = {
       id: `preset_${Date.now()}`,
       name: name.trim(),
       css: lastAppliedCSS.value,
-      source: lastAppliedSource.value ?? "toggles",
+      source: lastAppliedSource.value ?? 'toggles',
       createdAt: Date.now(),
     };
     presets.value.push(preset);
@@ -482,16 +488,18 @@ export const usePolishStore = defineStore("polish", () => {
 
   async function applyPreset(id: string) {
     const preset = presets.value.find((preset) => preset.id === id);
-    if (!preset) return;
-    lastAppliedCSS.value = preset.css;
-    lastAppliedSource.value = preset.source;
+    if (!preset) {
+      return;
+    }
     activePresetId.value = id;
     await sendCSSToPage(preset.css);
   }
 
   async function deletePreset(id: string) {
     presets.value = presets.value.filter((preset) => preset.id !== id);
-    if (activePresetId.value === id) activePresetId.value = null;
+    if (activePresetId.value === id) {
+      activePresetId.value = null;
+    }
     await persistPresets();
   }
 
@@ -547,7 +555,23 @@ p, li, td, th, label, blockquote {
     if (t.darkMode) {
       rules.push(`
 /* ── Dark Mode ── */
-html, body { background-color: #1a1a1a !important; }
+html, body,
+div#root, div#app, div#__next, div#main, div#wrapper, div#container,
+main, article, section, footer, nav, aside,
+[role="main"], [id="main"], [id="content"],
+[class*="Layout"], [class*="wrapper"], [class*="Wrapper"],
+[class*="container"], [class*="Container"],
+[class*="page-"], [class*="Page"],
+[class*="content-wrap"], [class*="app-body"],
+[class*="feed"], [class*="content"], [class*="layout"],
+[class*="header"], [class*="Header"],
+[class*="nav"], [class*="Nav"],
+[class*="subnav"], [class*="sub-nav"],
+[class*="toolbar"], [class*="Toolbar"],
+[class*="topbar"], [class*="top-bar"],
+[class*="banner"], [class*="Banner"] {
+  background-color: #1a1a1a !important;
+}
 p, span, li, td, th, dt, dd, label, caption,
 blockquote, figcaption, address, cite, small, time,
 strong, em, b, i, u, s, mark, code, kbd, samp,
@@ -696,7 +720,7 @@ code, pre, kbd { font-family: 'JetBrains Mono', 'Fira Code', monospace !importan
       `);
     }
 
-    return rules.join("\n");
+    return rules.join('\n');
   }
 
   function buildFineTuneCSS(ft: FineTuneState): string {
@@ -757,21 +781,21 @@ input, textarea, select, button, blockquote {
       }
     }
 
-    return rules.join("\n");
+    return rules.join('\n');
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
   async function fetchAiCSS(prompt: string): Promise<string> {
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
-        { type: "GENERATE_CSS", prompt },
+        { type: 'GENERATE_CSS', prompt },
         (response: { css?: string; error?: string }) => {
           if (chrome.runtime.lastError) {
             reject(chrome.runtime.lastError);
           } else if (response?.error) {
             reject(new Error(response.error));
           } else {
-            resolve(response?.css ?? "");
+            resolve(response?.css ?? '');
           }
         },
       );
@@ -782,12 +806,15 @@ input, textarea, select, button, blockquote {
     const injectFontLink = (toggles.readable || forceFont) && !!css;
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
-        { type: "APPLY_CSS", css, injectFontLink },
+        { type: 'APPLY_CSS', css, injectFontLink },
         (response: { ok: boolean; error?: string }) => {
-          if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
-          else if (!response?.ok)
-            reject(new Error(response?.error ?? "Unknown error"));
-          else resolve();
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else if (!response?.ok) {
+            reject(new Error(response?.error ?? 'Unknown error'));
+          } else {
+            resolve();
+          }
         },
       );
     });
