@@ -6,6 +6,12 @@
 
 ---
 
+## Get the extension from Chrome Web Store
+
+**[→ Add Polish to Chrome](https://chromewebstore.google.com/detail/polish%E2%9C%A6/fjejdndlacakdmjnmeabehlnamdlofmn)**
+
+---
+
 ## What it does
 
 Polish is a Chrome side panel extension that lets you apply visual styles to any website you're browsing — without touching the site's code.
@@ -13,6 +19,7 @@ Polish is a Chrome side panel extension that lets you apply visual styles to any
 - **One-Click Polish** — toggle contrast, dark mode, focus mode, readable fonts, and extra spacing
 - **Theme Presets** — curated full-page vibes (Miami Vice, Cyber Mode, Night Owl, and more)
 - **Fine-Tune** — adjust font size, heading scale, background and text color, and font family
+- **Google Fonts** — browse and apply any font from Google Fonts directly to any page
 - **AI Style** — describe a look in plain text and get a custom CSS style generated instantly
 - **My Presets** — save any style you like and re-apply it on any site
 
@@ -75,12 +82,11 @@ Then load the `dist/` folder as above — Vite will rebuild on changes.
 
 ## Status
 
-This is an early release — the core experience works but expect rough edges. Planned improvements include:
+Polish is live on the Chrome Web Store. This is an early release — the core experience works but expect rough edges. Planned improvements include:
 
 - Per-site style memory improvements
 - More system presets
 - Shareable preset links
-- Chrome Web Store release
 
 ---
 
@@ -90,4 +96,5 @@ This is an early release — the core experience works but expect rough edges. P
 - Tailwind CSS v4
 - Pinia
 - Chrome Extension Manifest v3
+- Google Fonts API
 - Groq API (via [polish-api](https://github.com/Royshell/polish-api) proxy)
