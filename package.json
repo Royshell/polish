@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky"
   },
   "dependencies": {
     "pinia": "^2.3.1",
@@ -24,13 +25,26 @@
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.7.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.2.0",
     "twemoji": "^14.0.2",
     "typescript": "~5.9.3",
+    "typescript-eslint": "^8.57.1",
     "vite": "^7.2.4",
+    "vue-eslint-parser": "^10.4.0",
     "vue-tsc": "^3.1.4"
+  },
+  "lint-staged": {
+    "*.{ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,json,md}": [
+      "prettier --write"
+    ]
   }
 }
