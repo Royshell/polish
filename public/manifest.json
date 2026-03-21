@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Polish✦",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Refine the web you're on.",
   "action": {
     "default_title": "Click to open Polish",
