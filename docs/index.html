@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Polish ✦ — Restyle any website, instantly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080808;
+    --bg2: #0f0f0f;
+    --bg3: #161616;
+    --border: rgba(255,255,255,0.07);
+    --gold: #c8a96e;
+    --gold-dim: rgba(200, 169, 110, 0.15);
+    --gold-glow: rgba(200, 169, 110, 0.08);
+    --text: #f0ece3;
+    --text-dim: rgba(240, 236, 227, 0.5);
+    --text-faint: rgba(240, 236, 227, 0.25);
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  nav::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent 0%, #DC143C 30%, #DC143C 70%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  nav.scrolled::after { opacity: 0.4; }
+  nav.scrolled {
+    border-color: transparent;
+    background: rgba(8,8,8,0.85);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  /* Polish flag ✦ easter egg */
+  .polish-star {
+    display: inline-block;
+    background: linear-gradient(to bottom, #ffffff 50%, #DC143C 50%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    cursor: default;
+    transition: transform 0.2s;
+  }
+  .polish-star:hover { transform: rotate(30deg) scale(1.2); }
+
+  .polish-star::after {
+    content: 'Like the country, not the verb 🇵🇱';
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    -webkit-text-fill-color: var(--text-dim);
+    white-space: nowrap;
+    padding: 6px 12px;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .polish-star:hover::after { opacity: 1; }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--gold) !important;
+    color: var(--bg) !important;
+    padding: 8px 20px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    transition: opacity 0.2s !important;
+  }
+  .nav-cta:hover { opacity: 0.85 !important; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Radial glow */
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(ellipse, rgba(200,169,110,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(200,169,110,0.3);
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 2s ease infinite;
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(52px, 8vw, 100px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero-title .accent { color: var(--gold); }
+  .hero-title .dim { color: var(--text-faint); }
+
+  .hero-sub {
+    max-width: 480px;
+    color: var(--text-dim);
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gold);
+    color: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 14px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-primary svg { flex-shrink: 0; }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dim);
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--text); }
+
+  /* Browser mockup */
+  .hero-mockup {
+    margin-top: 80px;
+    width: 100%;
+    max-width: 860px;
+    position: relative;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  /* GIF demo */
+  .mockup-gif {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03),
+      0 40px 80px rgba(0,0,0,0.6),
+      0 0 120px rgba(200,169,110,0.04);
+    display: block;
+  }
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03),
+      0 40px 80px rgba(0,0,0,0.6),
+      0 0 120px rgba(200,169,110,0.04);
+  }
+
+  .mockup-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mockup-dots {
+    display: flex; gap: 6px;
+  }
+  .mockup-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .mockup-dots span:nth-child(1) { background: #ff5f57; }
+  .mockup-dots span:nth-child(2) { background: #febc2e; }
+  .mockup-dots span:nth-child(3) { background: #28c840; }
+
+  .mockup-url {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    max-width: 340px;
+  }
+
+  .mockup-body {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    min-height: 340px;
+  }
+
+  .mockup-site {
+    background: #111;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .site-line {
+    height: 10px;
+    background: var(--border);
+    border-radius: 4px;
+  }
+  .site-line.title { width: 55%; height: 18px; background: rgba(255,255,255,0.12); }
+  .site-line.short { width: 30%; }
+  .site-line.mid { width: 70%; }
+  .site-line.full { width: 95%; }
+  .site-line.img {
+    height: 90px;
+    width: 100%;
+    background: var(--bg3);
+    border-radius: 6px;
+    margin: 6px 0;
+  }
+
+  /* Animated style overlay on mockup */
+  .style-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(200,169,110,0.06), transparent 60%);
+    animation: overlayShift 4s ease infinite alternate;
+  }
+
+  .mockup-panel {
+    background: #0a0a0a;
+    border-left: 1px solid var(--border);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .panel-title span { color: var(--gold); }
+
+  .panel-section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    margin-bottom: -8px;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .toggle-label { font-size: 12px; color: var(--text-dim); }
+  .toggle {
+    width: 32px; height: 18px;
+    background: var(--border);
+    border-radius: 100px;
+    position: relative;
+    cursor: pointer;
+  }
+  .toggle.on { background: var(--gold); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 12px; height: 12px;
+    background: white;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform 0.2s;
+  }
+  .toggle.on::after { transform: translateX(14px); }
+
+  .theme-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    font-size: 10px;
+    font-family: var(--mono);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover, .chip.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+  .ai-input-mock {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ai-cursor {
+    display: inline-block;
+    width: 1px; height: 12px;
+    background: var(--gold);
+    animation: blink 1s step-end infinite;
+  }
+
+
+  /* ── SECTION SHARED ── */
+  section { padding: 100px 24px; }
+
+  .section-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.3;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+
+  .section-sub {
+    color: var(--text-dim);
+    font-size: 17px;
+    font-weight: 300;
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  /* ── FEATURES ── */
+  #features { background: var(--bg); }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    margin-top: 64px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .feature-card {
+    background: var(--bg);
+    padding: 36px 32px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .feature-card:hover { background: var(--bg3); }
+
+  .feature-icon {
+    width: 40px; height: 40px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(200,169,110,0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .feature-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .feature-desc {
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  /* ── HOW IT WORKS ── */
+  #how { background: var(--bg2); }
+
+  .steps {
+    margin-top: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 0 32px;
+    position: relative;
+    padding-bottom: 48px;
+  }
+  .step:last-child { padding-bottom: 0; }
+
+  .step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .step-num {
+    width: 48px; height: 48px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--gold);
+    flex-shrink: 0;
+    z-index: 1;
+    position: relative;
+  }
+
+  .step-line {
+    flex: 1;
+    width: 1px;
+    background: var(--border);
+    margin-top: 8px;
+  }
+  .step:last-child .step-line { display: none; }
+
+  .step-content {
+    padding-top: 10px;
+  }
+
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .step-desc {
+    color: var(--text-dim);
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  .step-code {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .step-code .highlight { color: var(--gold); }
+
+  /* ── TECH STACK ── */
+  #stack { background: var(--bg); }
+
+  .stack-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 48px;
+  }
+
+  .stack-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-dim);
+    transition: all 0.2s;
+  }
+  .stack-pill:hover {
+    border-color: rgba(200,169,110,0.3);
+    color: var(--text);
+  }
+  .stack-pill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+
+  /* ── CTA ── */
+  #cta {
+    background: var(--bg2);
+    text-align: center;
+    padding: 120px 24px;
+  }
+
+  .cta-inner {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .cta-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+  }
+  .cta-title .accent { color: var(--gold); }
+
+  .cta-sub {
+    color: var(--text-dim);
+    font-size: 17px;
+    font-weight: 300;
+    margin-bottom: 48px;
+    line-height: 1.7;
+  }
+
+  .cta-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .footer-logo span { color: var(--gold); }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+  }
+  .footer-links a {
+    color: var(--text-faint);
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--text-dim); }
+
+  .footer-copy {
+    color: var(--text-faint);
+    font-size: 12px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  @keyframes overlayShift {
+    from { opacity: 0.5; }
+    to   { opacity: 1; }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .mockup-body { grid-template-columns: 1fr; }
+    .mockup-panel { display: none; }
+    footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a class="nav-logo" href="#">Polish <span class="polish-star">✦</span></a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="https://github.com/Royshell/polish">GitHub</a></li>
+    <li><a href="https://chrome.google.com/webstore" class="nav-cta">Add to Chrome</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    Now live on the Chrome Web Store
+  </div>
+
+  <h1 class="hero-title">
+    Restyle<br />
+    <span class="accent">any</span> website<span class="dim">.</span>
+  </h1>
+
+  <p class="hero-sub">
+    A browser sidebar that puts visual control in your hands — dark mode, custom fonts, AI-generated themes, and more. No code required.
+  </p>
+
+  <div class="hero-actions">
+    <a class="btn-primary" href="https://chrome.google.com/webstore">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+        <line x1="21.17" y1="8" x2="11.99" y2="8"/>
+        <line x1="3.95" y1="6.06" x2="8.54" y2="14"/>
+        <line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
+      </svg>
+      Add to Chrome — it's free
+    </a>
+    <a class="btn-ghost" href="https://github.com/Royshell/polish">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
+      </svg>
+      View source
+    </a>
+  </div>
+
+  <!-- Demo GIF -->
+  <div class="hero-mockup">
+    <img class="mockup-gif" src="./assets/demo.gif" alt="Polish in action — restyling a website from the sidebar" />
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-label reveal">Features</div>
+    <h2 class="section-title reveal">Everything you need<br />to own the web.</h2>
+    <p class="section-sub reveal">Six ways to transform any page — from one-click presets to AI-generated styles.</p>
+
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-name">One-Click Polish</div>
+        <p class="feature-desc">Toggle dark mode, focus mode, readable fonts, high contrast, and extra spacing in seconds.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-name">Theme Presets</div>
+        <p class="feature-desc">Curated full-page vibes — Miami Vice, Cyber Mode, Night Owl, and more. One click, whole page.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔤</div>
+        <div class="feature-name">Google Fonts</div>
+        <p class="feature-desc">Browse the entire Google Fonts catalog and apply any typeface to any page, live.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✦</div>
+        <div class="feature-name">AI Style</div>
+        <p class="feature-desc">Describe a look in plain text. Get custom CSS injected instantly. Powered by Groq.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎛</div>
+        <div class="feature-name">Fine-Tune</div>
+        <p class="feature-desc">Adjust font size, heading scale, background color, text color, and font family with precision controls.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📌</div>
+        <div class="feature-name">My Presets</div>
+        <p class="feature-desc">Save any style you create and re-apply it across any site, any time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-inner">
+    <div class="section-label reveal">How it works</div>
+    <h2 class="section-title reveal">Designed to stay<br />out of your way.</h2>
+
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-left">
+          <div class="step-num">01</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Install from Chrome Web Store</div>
+          <p class="step-desc">One click, no configuration. Polish lives in your sidebar — always there, never in the way.</p>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-left">
+          <div class="step-num">02</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Open the panel on any site</div>
+          <p class="step-desc">Click the Polish icon in your toolbar. The side panel opens without interrupting the page.</p>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-left">
+          <div class="step-num">03</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Apply a style — or describe one</div>
+          <p class="step-desc">Pick a preset, toggle a switch, or type a description like <em>"warm sepia, large text, serif font"</em>. Polish handles the CSS.</p>
+          <div class="step-code">
+            POST /api/generate → <span class="highlight">/* custom CSS */</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-left">
+          <div class="step-num">04</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Save it. Reuse it anywhere.</div>
+          <p class="step-desc">Save your style as a preset and apply it to any site with one click. Your styles, your web.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section id="stack">
+  <div class="section-inner">
+    <div class="section-label reveal">Built with</div>
+    <h2 class="section-title reveal">Modern stack,<br />zero bloat.</h2>
+    <p class="section-sub reveal">Built on Manifest V3 with a privacy-first API proxy — your credentials never leave the server.</p>
+
+    <div class="stack-grid reveal">
+      <div class="stack-pill"><span class="stack-pill-dot"></span>Vue 3 + TypeScript</div>
+      <div class="stack-pill"><span class="stack-pill-dot"></span>Vite</div>
+      <div class="stack-pill"><span class="stack-pill-dot"></span>Tailwind CSS v4</div>
+      <div class="stack-pill"><span class="stack-pill-dot"></span>Pinia</div>
+      <div class="stack-pill"><span class="stack-pill-dot"></span>Chrome Manifest V3</div>
+      <div class="stack-pill"><span class="stack-pill-dot"></span>Google Fonts API</div>
+      <div class="stack-pill"><span class="stack-pill-dot"></span>Groq API</div>
+      <div class="stack-pill"><span class="stack-pill-dot"></span>Vercel (API proxy)</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-inner">
+    <h2 class="cta-title reveal">Your web,<br /><span class="accent">your rules.</span></h2>
+    <p class="cta-sub reveal">Free. No account needed. Works on any website.</p>
+    <div class="cta-actions reveal">
+      <a class="btn-primary" href="https://chrome.google.com/webstore">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+          <line x1="21.17" y1="8" x2="11.99" y2="8"/>
+          <line x1="3.95" y1="6.06" x2="8.54" y2="14"/>
+          <line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
+        </svg>
+        Add to Chrome — it's free
+      </a>
+      <a class="btn-ghost" href="https://github.com/Royshell/polish">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
+        </svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a class="footer-logo" href="#">Polish <span class="polish-star">✦</span></a>
+  <ul class="footer-links">
+    <li><a href="https://github.com/Royshell/polish">GitHub</a></li>
+    <li><a href="https://github.com/Royshell/polish-api">API</a></li>
+    <li><a href="https://chrome.google.com/webstore">Chrome Store</a></li>
+  </ul>
+  <span class="footer-copy">Built by Royshell</span>
+</footer>
+
+<script>
+  // Nav scroll effect
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  reveals.forEach(el => observer.observe(el));
+
+  // Toggle interaction in mockup
+  document.querySelectorAll('.toggle').forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('on'));
+  });
+  document.querySelectorAll('.chip').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
