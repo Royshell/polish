@@ -54,7 +54,6 @@ The extension communicates with a lightweight API proxy that handles AI style ge
 
 ```bash
 git clone https://github.com/Royshell/polish.git
-cd polish/extension
 pnpm install
 pnpm build
 ```
