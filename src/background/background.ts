@@ -10,13 +10,17 @@
 //   permissions and unrestricted fetch access.
 
 import { POLISH_API_URL, STYLE_ELEMENT_ID, FONT_LINK_ID } from '../constants';
+import { isFirefox } from '../browser';
 
-// ── Panel behaviour ────────────────────────────────────────────────────────
-chrome.sidePanel
-  .setPanelBehavior({ openPanelOnActionClick: true })
-  .catch((err) => console.error('[Polish] sidePanel:', err));
+// ── Panel behaviour ─────────────────────────────────────────────────────────
+// Chrome only — Firefox opens the sidebar via the manifest sidebar_action key
+if (!isFirefox) {
+  chrome.sidePanel
+    .setPanelBehavior({ openPanelOnActionClick: true })
+    .catch((err) => console.error('[Polish] sidePanel:', err));
+}
 
-// ── Helpers injected into the page via executeScript ──────────────────────
+// ── Helpers injected into the page via executeScript ────────────────────────
 // These functions run INSIDE the target tab's page context, not here.
 
 /** Inject or remove the Inter font <link> tag. */
@@ -38,17 +42,14 @@ function manageFontLink(inject: boolean, fontLinkId: string) {
 /**
  * Inject Google Font <link> tags extracted from CSS @import statements.
  * Removes any previously injected AI font links first, then injects fresh ones.
- * Called with the raw CSS string — font URLs are parsed here in the page context.
  */
 function manageGoogleFontLinks(fontUrls: string[]) {
-  // Remove all previously injected AI font links
   document.querySelectorAll('[data-polish-ai-font]').forEach((element) => element.remove());
 
   if (!fontUrls.length) {
     return;
   }
 
-  // Ensure preconnect hints exist (idempotent)
   if (!document.querySelector('link[href="https://fonts.googleapis.com"][rel="preconnect"]')) {
     const preconnect1 = document.createElement('link');
     preconnect1.rel = 'preconnect';
@@ -63,7 +64,6 @@ function manageGoogleFontLinks(fontUrls: string[]) {
     document.head.appendChild(preconnect2);
   }
 
-  // Inject one <link rel="stylesheet"> per font URL
   fontUrls.forEach((href, index) => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -88,13 +88,8 @@ function applyStyleToPage(css: string, styleId: string) {
   el.textContent = css;
 }
 
-// ── CSS injection ──────────────────────────────────────────────────────────
+// ── CSS injection ────────────────────────────────────────────────────────────
 
-/**
- * Extract all Google Fonts URLs from @import statements in a CSS string.
- * This runs in the background service worker (not the page), so we can use
- * any JS we like here — no serialisation concerns.
- */
 function extractGoogleFontUrls(css: string): string[] {
   const urls: string[] = [];
   const importRe =
@@ -116,8 +111,6 @@ async function injectCSS(css: string, injectFontLink: boolean): Promise<void> {
   }
 
   const tabId = tab.id;
-
-  // Extract Google Font URLs from the CSS @import statements before injecting
   const googleFontUrls = extractGoogleFontUrls(css);
 
   await chrome.scripting.executeScript({
@@ -126,7 +119,6 @@ async function injectCSS(css: string, injectFontLink: boolean): Promise<void> {
     args: [injectFontLink, FONT_LINK_ID],
   });
 
-  // Inject <link> tags for any Google Fonts found in the CSS
   await chrome.scripting.executeScript({
     target: { tabId },
     func: manageGoogleFontLinks,
@@ -140,7 +132,8 @@ async function injectCSS(css: string, injectFontLink: boolean): Promise<void> {
   });
 }
 
-// ── Polish API proxy ───────────────────────────────────────────────────────
+// ── Polish API proxy ─────────────────────────────────────────────────────────
+
 async function generateCSSFromPrompt(prompt: string): Promise<string> {
   const response = await fetch(POLISH_API_URL, {
     method: 'POST',
@@ -160,7 +153,8 @@ async function generateCSSFromPrompt(prompt: string): Promise<string> {
   return data.css ?? '';
 }
 
-// ── Message router ─────────────────────────────────────────────────────────
+// ── Message router ───────────────────────────────────────────────────────────
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'APPLY_CSS') {
     injectCSS(message.css ?? '', message.injectFontLink ?? false)
