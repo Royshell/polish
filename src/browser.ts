@@ -1,19 +1,40 @@
 interface FirefoxBrowser {
-  // add this at  the top of the page
-  sidebarAction?: unknown;
+  sidebarAction?: {
+    open: () => Promise<void>;
+  };
+}
+
+interface ChromiumSidePanel {
+  open: (options: { tabId: number }) => Promise<void>;
+}
+
+interface ChromiumAPI {
+  sidePanel: ChromiumSidePanel;
 }
 
 const browserAPI = (globalThis as { browser?: FirefoxBrowser }).browser;
+
 export const isFirefox = typeof browserAPI?.sidebarAction !== 'undefined';
+
+function getChromiumAPI(): ChromiumAPI {
+  const chromium = globalThis.chrome as unknown as ChromiumAPI;
+
+  if (!chromium?.sidePanel) {
+    throw new Error('Chromium sidePanel API not available');
+  }
+
+  return chromium;
+}
 
 export async function openSidebar(tabId?: number): Promise<void> {
   if (isFirefox) {
-    await (globalThis as any).browser.sidebarAction.open();
+    await browserAPI!.sidebarAction!.open();
   } else {
     if (tabId === undefined) {
-      console.error('[Polish] openSidebar: tabId is undefined');
-      throw new Error('[Polish] openSidebar requires a tabId in Chrome');
+      throw new Error('[Polish] openSidebar requires a tabId in Chromium');
     }
-    await chrome.sidePanel.open({ tabId });
+
+    const chromium = getChromiumAPI();
+    await chromium.sidePanel.open({ tabId });
   }
 }
