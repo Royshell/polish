@@ -1,6 +1,7 @@
 import { ref, reactive, toRaw } from 'vue';
 import { defineStore } from 'pinia';
 import { STORAGE_KEY, SITE_KEY_PREFIX } from '../constants';
+import { getSitePatch, mergeWithPatch, type ThemePatchId } from '../site-patches';
 
 export interface PolishToggles {
   moreContrast: boolean;
@@ -398,11 +399,15 @@ export const usePolishStore = defineStore('polish', () => {
     if (!preset) {
       return;
     }
+    const hostname = await getCurrentHostname();
+    const patch = getSitePatch(hostname, id as ThemePatchId);
+    const finalCSS = mergeWithPatch(preset.css.trim(), patch);
+
     selectedPreset.value = id;
-    lastAppliedCSS.value = preset.css.trim();
+    lastAppliedCSS.value = finalCSS;
     lastAppliedSource.value = 'toggles';
     activePresetId.value = null;
-    await sendCSSToPage(preset.css.trim());
+    await sendCSSToPage(finalCSS);
     await saveSiteState();
   }
 
@@ -434,9 +439,19 @@ export const usePolishStore = defineStore('polish', () => {
   async function applyPolish() {
     isPolishing.value = true;
     try {
-      const css = buildToggleCSS(toggles);
-      await sendCSSToPage(css);
-      lastAppliedCSS.value = css;
+      const baseCSS = buildToggleCSS(toggles);
+      // Determine which patch key to use based on active toggle
+      const themeId: ThemePatchId = toggles.darkMode
+        ? 'darkMode'
+        : toggles.moreContrast
+          ? 'moreContrast'
+          : 'darkMode'; // fallback (no patch = '')
+      const hostname = await getCurrentHostname();
+      const patch = getSitePatch(hostname, themeId);
+      const finalCSS = mergeWithPatch(baseCSS, patch);
+
+      await sendCSSToPage(finalCSS);
+      lastAppliedCSS.value = finalCSS;
       lastAppliedSource.value = 'toggles';
       activePresetId.value = null;
       selectedPreset.value = '';
@@ -449,9 +464,13 @@ export const usePolishStore = defineStore('polish', () => {
   async function generateAiStyle(prompt: string) {
     isGenerating.value = true;
     try {
-      const css = await fetchAiCSS(prompt);
-      await sendCSSToPage(css);
-      lastAppliedCSS.value = css;
+      const baseCSS = await fetchAiCSS(prompt);
+      const hostname = await getCurrentHostname();
+      const patch = getSitePatch(hostname, 'ai');
+      const finalCSS = mergeWithPatch(baseCSS, patch);
+
+      await sendCSSToPage(finalCSS);
+      lastAppliedCSS.value = finalCSS;
       lastAppliedSource.value = 'ai';
       activePresetId.value = null;
       selectedPreset.value = '';
@@ -555,6 +574,8 @@ p, li, td, th, label, blockquote {
     if (t.darkMode) {
       rules.push(`
 /* ── Dark Mode ── */
+
+/* Page-level background */
 html, body,
 div#root, div#app, div#__next, div#main, div#wrapper, div#container,
 main, article, section, footer, nav, aside,
@@ -572,6 +593,30 @@ main, article, section, footer, nav, aside,
 [class*="banner"], [class*="Banner"] {
   background-color: #1a1a1a !important;
 }
+
+/* Surface-level: cards, panels, sidebars (generic sites) */
+[class*="card"], [class*="Card"],
+[class*="panel"], [class*="Panel"],
+[class*="sidebar"], [class*="Sidebar"],
+[class*="aside"], [class*="Aside"],
+[class*="drawer"], [class*="Drawer"],
+[class*="dropdown"], [class*="Dropdown"],
+[class*="popover"], [class*="Popover"],
+[class*="modal"], [class*="Modal"],
+[class*="dialog"], [class*="Dialog"],
+[class*="widget"], [class*="Widget"] {
+  background-color: #242424 !important;
+  border-color: #333 !important;
+}
+
+/* Elevated: tooltips, menus */
+[class*="tooltip"], [class*="Tooltip"],
+[class*="menu"], [class*="Menu"],
+[role="tooltip"], [role="menu"], [role="dialog"] {
+  background-color: #2c2c2c !important;
+  border-color: #444 !important;
+}
+
 p, span, li, td, th, dt, dd, label, caption,
 blockquote, figcaption, address, cite, small, time,
 strong, em, b, i, u, s, mark, code, kbd, samp,
