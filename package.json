@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "build:firefox": "vue-tsc -b && cross-env TARGET=firefox vite build",
+    "dev:firefox": "cross-env TARGET=firefox vite",
     "preview": "vite preview",
     "prepare": "husky"
   },
@@ -22,6 +24,7 @@
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.8.1",
     "autoprefixer": "^10.4.24",
+    "cross-env": "^10.1.0",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.7.0",
