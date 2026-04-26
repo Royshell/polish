@@ -1,0 +1,48 @@
+{
+  "manifest_version": 2,
+  "name": "Polish✦",
+  "version": "1.0",
+  "description": "Restyle any website — instantly, from your browser sidebar.",
+  "permissions": ["activeTab", "scripting", "storage", "<all_urls>"],
+  "background": {
+    "scripts": ["background/background.js"],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Polish✦"
+  },
+  "sidebar_action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Polish✦",
+    "default_panel": "index.html",
+    "open_at_install": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/contentScript.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": ["assets/*"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "polish@royshell.dev",
+      "strict_min_version": "109.0"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
