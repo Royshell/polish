@@ -17,7 +17,7 @@ identifiable information.
 
 ## Third-Party Services
 
-Page content may be sent to the Groq API (running the Llama model) solely to generate
+Page content may be sent to the Groq API (running the OpenAI model) solely to generate
 visual enhancement suggestions. No data is stored or shared beyond
 this single request. The API integration is fully open-source and auditable at:
 https://github.com/Royshell/polish-api
